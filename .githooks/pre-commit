@@ -1,0 +1,20 @@
+#!/bin/sh
+# Portable pre-commit hook for local environments without Node/Husky
+# Falls back to Python if Node is not available
+
+# Only run inside a git repo
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+
+if command -v node >/dev/null 2>&1; then
+  # Prefer Node script if available
+  node scripts/auto-release-log.mjs || true
+else
+  if command -v python3 >/dev/null 2>&1; then
+    python3 scripts/auto_release_local.py || true
+  fi
+fi
+
+# Stage files possibly modified by the hook
+git add package.json system.meta.json modules/**/module.manifest.json modules/ReleaseManagement/release-log.json 2>/dev/null || true
+
+exit 0

@@ -1,0 +1,21 @@
+name: Deploy Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ staging ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm i
+      - run: npm run build:css --if-present
+      - name: Smoke Test (staging)
+        run: test -f dist/output.css && echo "Staging build OK"
+

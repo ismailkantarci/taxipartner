@@ -1,0 +1,8 @@
+{
+  "name": "NotFound",
+  "version": "1.3.415",
+  "type": "functional",
+  "entry": "index.module.js",
+  "author": "system",
+  "description": "404 page"
+}

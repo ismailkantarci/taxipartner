@@ -1,0 +1,8 @@
+.local_watch.log
+.local_watch.pid
+.local_release_state.json
+.tp_admin.env
+release-pack/
+dist/
+node_modules/
+*.log

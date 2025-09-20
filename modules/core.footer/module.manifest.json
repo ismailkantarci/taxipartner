@@ -1,0 +1,8 @@
+{
+  "name": "Footer",
+  "version": "1.3.415",
+  "type": "core",
+  "entry": "index.module.js",
+  "author": "Ismail",
+  "description": "Displays system info and current user/module context."
+}

@@ -1,0 +1,22 @@
+name: Rollback
+
+on:
+  repository_dispatch:
+    types: [rollback-request]
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Find last tag
+        id: last
+        run: |
+          TAG=$(git describe --tags --abbrev=0) || echo ""
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      - name: Rollback (placeholder)
+        run: |
+          echo "Rolling back to ${{ steps.last.outputs.tag }} (implement environment specific steps here)"
+

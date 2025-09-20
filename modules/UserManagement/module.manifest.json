@@ -1,0 +1,8 @@
+{
+  "name": "UserManagement",
+  "version": "1.3.415",
+  "type": "functional",
+  "entry": "index.module.js",
+  "author": "Ismail",
+  "description": "Handles user listing, profiles, and role management."
+}

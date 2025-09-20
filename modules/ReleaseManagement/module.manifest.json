@@ -1,0 +1,8 @@
+{
+  "name": "ReleaseManagement",
+  "version": "1.3.415",
+  "type": "functional",
+  "entry": "index.module.js",
+  "author": "Ismail",
+  "description": "Displays and filters version logs. Handles structured release history."
+}

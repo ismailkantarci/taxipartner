@@ -1,0 +1,47 @@
+{
+  "name": "taxipartner-admin-suite",
+  "version": "1.3.415",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/strip-webkit-text-size-adjust.mjs || true",
+    "dev": "vite",
+    "build": "vite build && tailwindcss -i src/styles/tailwind.css -o dist/output.css --minify && node scripts/strip-webkit-text-size-adjust.mjs || true",
+    "preview": "vite preview",
+    "build:css": "tailwindcss -i src/styles/tailwind.css -o dist/output.css --minify",
+    "test": "vitest",
+    "lint": "eslint . --ext .js",
+    "version:sync": "node scripts/version-sync.mjs",
+    "auto-release:setup": "node scripts/auto-release-setup.mjs",
+    "watch:auto-release": "bash scripts/local_watch.sh start",
+    "watch:auto-release:stop": "bash scripts/local_watch.sh stop",
+    "watch:auto-release:status": "bash scripts/local_watch.sh status",
+    "changelog": "node scripts/generate-changelog.mjs",
+    "validate:modules": "node scripts/validate-modules.mjs",
+    "validate:releases": "node scripts/validate-release-log.mjs",
+    "sbom": "cyclonedx-npm --json -o release-pack/sbom.json",
+    "license:report": "license-checker-rseidelsohn --json --production --out release-pack/licenses.json",
+    "release:pack": "node scripts/build-release-pack.mjs",
+    "release:auto": "node scripts/auto-release-log.mjs",
+    "prepare": "husky install",
+    "postinstall": "node scripts/auto-release-setup.mjs || true"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.5",
+    "eslint": "^9.11.1",
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1",
+    "yaml": "^2.5.0",
+    "husky": "^9.0.11",
+    "jsdom": "^24.1.0",
+    "@cyclonedx/cyclonedx-npm": "^4.0.2",
+    "license-checker-rseidelsohn": "^4.4.2"
+  },
+  "scriptsPrivate": {
+    "audit": "node scripts/generate-audit.mjs"
+  }
+}

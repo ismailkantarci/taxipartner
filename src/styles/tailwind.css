@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base headings to avoid MDN h1 warning if CSS loads slowly */
+@layer base {
+  h1 { @apply text-2xl font-bold mb-2; }
+  h2 { @apply text-xl font-semibold mb-2; }
+  :root { color-scheme: light; }
+  .dark { color-scheme: dark; }
+  /* Account for fixed header when jumping to main */
+  #modulContent { scroll-margin-top: 3.5rem; }
+}
+
+/* Toast component styles */
+@layer components {
+  .toast-container { @apply fixed right-4 bottom-4 z-[99999]; }
+  .toast { @apply px-3 py-2 mt-2 rounded-lg shadow text-sm; }
+  .toast--info { @apply text-gray-800 bg-gray-200 dark:text-gray-100 dark:bg-gray-700; }
+  .toast--error { @apply text-red-900 bg-red-200 dark:text-red-200 dark:bg-red-900/50; }
+  /* Density: compact rows */
+  table.rm-density-compact td,
+  table.rm-density-compact th { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+  /* Zebra + subtle grid */
+  table.rm-table tbody tr:nth-child(even) { @apply bg-gray-50 dark:bg-gray-800/50; }
+  table.rm-table { @apply divide-y divide-gray-200 dark:divide-gray-700; }
+  table.rm-table tbody tr { @apply divide-y divide-gray-100 dark:divide-gray-800; }
+  /* Module chip seeded colors */
+  .rm-chip-1 { @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100; }
+  .rm-chip-2 { @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100; }
+  .rm-chip-3 { @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100; }
+  .rm-chip-4 { @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100; }
+  .rm-chip-5 { @apply bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100; }
+  .rm-chip-6 { @apply bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-100; }
+  .rm-chip-7 { @apply bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-100; }
+  .rm-chip-8 { @apply bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100; }
+}

@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm i
+      - run: node scripts/version-sync.mjs
+      - name: Check release calendar freeze
+        run: node scripts/check-calendar.mjs
+      - name: Ensure i18n descriptions (migrate + draft)
+        run: |
+          node scripts/migrate-release-descriptions.mjs || true
+          node scripts/translate-missing.mjs || true
+      - run: node scripts/generate-changelog.mjs
+      - run: node scripts/generate-changelog.mjs --lang=de
+      - run: node scripts/generate-changelog.mjs --lang=tr
+      - name: Build CSS
+        run: npm run build:css --if-present
+      - name: Prepare release package
+        run: |
+          npm run release:pack
+          npm run sbom
+          npm run license:report
+          node scripts/generate-provenance.mjs
+          # include localized changelogs in pack
+          cp -f CHANGELOG.*.md release-pack/ 2>/dev/null || true
+      - name: Create PIR draft file
+        run: |
+          V=$(node -p "require('./package.json').version")
+          mkdir -p pir
+          echo "# PIR v$V" > pir/PIR-v$V.md
+          cat post-implementation-review.md >> pir/PIR-v$V.md
+      - name: Security Audit (npm)
+        run: npm audit --audit-level=high || (echo "Audit found issues" && exit 1)
+      - name: OSV Scanner
+        uses: google/osv-scanner-action@v1
+        with:
+          scan-args: >-
+            --lockfile package-lock.json
+            --skip-git
+            .
+      - name: License Policy Gate
+        run: node scripts/license-policy.mjs
+      - name: Commit synced metadata
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add CHANGELOG.md system.meta.json modules/**/module.manifest.json pir/**
+            git commit -m "chore(release): sync metadata [skip ci]"
+            git push
+          fi
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-pack/RELEASE_NOTES.md
+          files: |
+            dist/output.css
+            release-pack/**

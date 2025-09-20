@@ -1,0 +1,8 @@
+{
+  "name": "Dashboard",
+  "version": "1.3.415",
+  "type": "functional",
+  "entry": "index.module.js",
+  "author": "Ismail",
+  "description": "Displays an overview of system state using AppState."
+}

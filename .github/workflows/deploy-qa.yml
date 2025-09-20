@@ -1,0 +1,21 @@
+name: Deploy QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ qa ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: qa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm i
+      - run: npm run build:css --if-present
+      - name: Smoke Test (build)
+        run: test -f dist/output.css && echo "QA build OK"
+

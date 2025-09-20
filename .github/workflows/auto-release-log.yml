@@ -1,0 +1,42 @@
+name: Auto Release Log
+
+on:
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: write
+
+jobs:
+  bump-log:
+    if: ${{ !contains(github.event.head_commit.message, 'chore(auto-release)') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm i
+      - name: Migrate release-log to multi-language (once, idempotent)
+        run: node scripts/migrate-release-descriptions.mjs || true
+      - name: Fill missing translations with [DRAFT]
+        run: node scripts/translate-missing.mjs || true
+      - name: Update release-log & version
+        run: node scripts/auto-release-log.mjs
+      - name: AI-enhance public notes (optional)
+        if: ${{ secrets.OPENAI_API_KEY != '' }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_LANGS: tr,de,en
+        run: node scripts/ai-release-summary.mjs --apply --top 1 || true
+      - name: Commit changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package.json system.meta.json modules/**/module.manifest.json modules/ReleaseManagement/release-log.json
+            git commit -m "chore(auto-release): bump patch and update release-log [skip ci]"
+            git push
+          fi

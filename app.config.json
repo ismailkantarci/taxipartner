@@ -1,0 +1,13 @@
+{
+  "telemetry": {
+    "enabled": true,
+    "maxEntries": 5000
+  },
+  "features": {
+    "serviceWorker": true
+  },
+  "flags": {
+    "release.canaryUi": { "rollout": 10, "seed": "tp-admin" }
+  },
+  "repoUrl": "https://github.com/<org>/<repo>"
+}

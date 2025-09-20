@@ -1,0 +1,21 @@
+name: Require Issue Link
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PR description contains issue reference
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const ok = /(Closes|Fixes|Resolves)\s+#\d+/i.test(body);
+            if (!ok) {
+              core.setFailed('PR description must reference an issue (e.g., "Closes #123").');
+            }
+

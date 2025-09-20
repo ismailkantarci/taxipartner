@@ -1,0 +1,12 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Multi-language migration (idempotent)
+node scripts/migrate-release-descriptions.mjs || true
+
+# Auto bump patch + release log
+node scripts/auto-release-log.mjs || true
+
+# Re-add changed files for the same commit
+git add package.json system.meta.json modules/**/module.manifest.json modules/ReleaseManagement/release-log.json || true
+

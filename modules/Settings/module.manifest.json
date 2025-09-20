@@ -1,0 +1,8 @@
+{
+  "name": "Settings",
+  "version": "1.3.415",
+  "type": "functional",
+  "entry": "index.module.js",
+  "author": "Ismail",
+  "description": "Allows user to modify AppState settings like language, theme, and user display."
+}

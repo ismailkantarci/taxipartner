@@ -1,0 +1,34 @@
+name: Audit Log
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm i
+      - name: Generate audit log
+        run: node scripts/generate-audit.mjs
+      - name: Commit audit updates
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add AUDITLOG.md audit/audit.log.json modules/**/AUDIT.md modules/**/audit.log.json modules/**/module.manifest.json
+            git commit -m "chore(audit): update audit log [skip ci]"
+            git push
+          else
+            echo "No audit changes to commit"
+          fi

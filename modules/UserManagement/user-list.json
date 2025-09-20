@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "fullName": "Ismail Kantarci",
+    "email": "ismail@taxipartner.at",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "fullName": "Selin Y\u0131lmaz",
+    "email": "selin@fleet.at",
+    "role": "editor"
+  },
+  {
+    "id": 3,
+    "fullName": "Thomas Bauer",
+    "email": "thomas@dispatch.at",
+    "role": "viewer"
+  }
+]

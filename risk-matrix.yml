@@ -1,0 +1,25 @@
+# Risk Matrix (Likelihood x Impact)
+
+impact:
+  low: 1
+  medium: 2
+  high: 3
+
+likelihood:
+  unlikely: 1
+  possible: 2
+  likely: 3
+
+thresholds:
+  low: 1-2
+  medium: 3-4
+  high: 5-9
+
+gates:
+  low:
+    required: ["unit-tests", "lint"]
+  medium:
+    required: ["unit-tests", "lint", "qa-approval"]
+  high:
+    required: ["unit-tests", "lint", "qa-approval", "security-scan", "cab-approval"]
+

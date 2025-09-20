@@ -1,0 +1,13 @@
+{
+  "activeModules": [
+    "Dashboard"
+  ],
+  "coreModules": [
+    "core.header",
+    "core.sidebar",
+    "core.moduleLoader",
+    "core.user",
+    "core.state",
+    "core.footer"
+  ]
+}
