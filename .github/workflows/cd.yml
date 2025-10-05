@@ -1,0 +1,25 @@
+name: CD (Deploy Placeholder)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [ "staging", "production" ]
+        default: "staging"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Info
+        run: |
+          echo "This is a placeholder CD. Wire your infra here (e.g., SSH, k8s, fly.io, render)."
+          echo "Use artifact or GHCR image from CI."
+      # Example (commented):
+      # - uses: actions/download-artifact@v4
+      #   with:
+      #     name: taxipartner-identity-dist
+      # - name: Deploy script
+      #   run: bash ops/deploy.sh ${{ github.event.inputs.environment }}

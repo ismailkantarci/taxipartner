@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#ffffff"/>
+  <rect x="32" y="32" width="576" height="160" rx="18" fill="#eef2ff"/>
+  <text x="56" y="80" font-family="Inter, Arial" font-size="24" fill="#3730a3">Default theme</text>
+  <text x="56" y="112" font-family="Inter, Arial" font-size="16" fill="#475569">Balanced white surfaces with indigo accents.</text>
+  <rect x="32" y="220" width="576" height="120" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+  <text x="56" y="260" font-family="Inter, Arial" font-size="16" fill="#1f2937">Example row</text>
+</svg>

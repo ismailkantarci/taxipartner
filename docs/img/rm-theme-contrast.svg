@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#111827"/>
+  <rect x="32" y="32" width="576" height="160" rx="18" fill="#1f2937" stroke="#f97316" stroke-width="2"/>
+  <text x="56" y="80" font-family="Inter, Arial" font-size="24" fill="#f97316">High Contrast</text>
+  <text x="56" y="112" font-family="Inter, Arial" font-size="16" fill="#e2e8f0">Pronounced borders and bold orange focus.</text>
+  <rect x="32" y="220" width="576" height="120" rx="18" fill="#0f172a" stroke="#f97316" stroke-width="2" stroke-dasharray="10 6"/>
+  <text x="56" y="260" font-family="Inter, Arial" font-size="16" fill="#f8fafc">Example row</text>
+</svg>

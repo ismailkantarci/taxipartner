@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Release Management Style Sandbox</title>
+    <!-- Build `npm run build` to populate dist/output.css. -->
+    <link rel="stylesheet" href="../dist/output.css" />
+    <link rel="stylesheet" href="../modules/ReleaseManagement/menu.css" />
+    <style>
+      body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f1f5f9;padding:40px}
+      .sandbox-grid{display:grid;gap:32px}
+      .sandbox-card{padding:24px;border-radius:12px;background:#fff;box-shadow:0 10px 30px rgba(15,23,42,.08)}
+      .dark-toggle{margin-bottom:24px;display:flex;gap:16px}
+      .dark .sandbox-card{background:#0f172a;color:#e2e8f0}
+      .sandbox-card h2{font-size:20px;font-weight:600;margin-bottom:12px}
+    </style>
+  </head>
+  <body>
+    <div class="dark-toggle">
+      <label><input type="checkbox" id="darkModeToggle" /> Dark mode</label>
+      <label>Theme
+        <select id="themeSwitch">
+          <option value="default">Default</option>
+          <option value="contrast">High Contrast</option>
+          <option value="brand">Brand</option>
+        </select>
+      </label>
+    </div>
+    <div class="rm-root" id="sandboxRoot">
+      <div class="sandbox-grid">
+        <section class="sandbox-card">
+          <h2>Release Cards</h2>
+          <div class="rm-card-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+            <article class="rm-release-card" data-version="1.4.0">
+              <header class="rm-release-card__head">
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center gap-2">
+                    <button type="button" class="rm-release-card__title">v1.4.0</button>
+                    <span class="rm-detail-tag rm-detail-tag--impact">critical</span>
+                  </div>
+                  <div class="rm-release-card__meta">
+                    <span>2024-09-21</span>
+                    <span>14:32</span>
+                    <span>alice</span>
+                  </div>
+                </div>
+                <div class="rm-release-card__select text-right">
+                  <span class="rm-release-card__status rm-status-badge rm-status-stable">Stable</span>
+                  <label class="inline-flex items-center gap-2 mt-3 justify-end">
+                    <input type="checkbox" checked />
+                    <span>Select</span>
+                  </label>
+                </div>
+              </header>
+              <div class="rm-release-card__desc">Yeni kart görünümü, tema desteği ve boş durumlar eklendi.</div>
+              <div class="rm-release-card__modules">
+                <button type="button" class="rm-chip rm-chip-2">UI</button>
+                <button type="button" class="rm-chip rm-chip-5">Automation</button>
+              </div>
+              <footer class="rm-release-card__footer">
+                <span>Modules: 2</span>
+                <div class="rm-release-card__actions">
+                  <button><span class="rm-ico rm-ico-json"></span>JSON</button>
+                  <button><span class="rm-ico rm-ico-md"></span>MD</button>
+                  <button><span class="rm-ico rm-ico-link"></span>Copy</button>
+                </div>
+              </footer>
+            </article>
+          </div>
+        </section>
+        <section class="sandbox-card">
+          <h2>Empty State</h2>
+          <div class="rm-empty" style="min-height:220px">
+            <div class="rm-empty-body">
+              <div class="rm-empty-icon"></div>
+              <h3 class="rm-empty-title">No releases found.</h3>
+              <p class="rm-empty-sub">Adjust filters or create a new release.</p>
+              <div class="rm-empty-actions">
+                <button class="rm-empty-cta"><span class="rm-ico rm-ico-plus"></span>New Release</button>
+                <button class="rm-empty-btn">Reset Filters</button>
+              </div>
+              <div class="rm-empty-quick">
+                <span class="rm-empty-quick-label">Quick filters:</span>
+                <button class="rm-empty-chip">Status: Stable</button>
+                <button class="rm-empty-chip">Last 30 days</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="sandbox-card">
+          <h2>Detail Modal Snippet</h2>
+          <div class="rm-detail-grid">
+            <div class="rm-detail-item">
+              <span class="rm-detail-icon rm-detail-icon-version"></span>
+              <div>
+                <div class="rm-detail-label">Version</div>
+                <div class="rm-detail-value">v1.4.0</div>
+              </div>
+            </div>
+            <div class="rm-detail-item">
+              <span class="rm-detail-icon rm-detail-icon-status"></span>
+              <div>
+                <div class="rm-detail-label">Status</div>
+                <div class="rm-detail-value"><span class="rm-detail-status" data-status="stable">Stable</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="rm-detail-tags">
+            <span class="rm-detail-tag rm-detail-tag--impact">critical</span>
+            <span class="rm-detail-tag rm-detail-tag--risk-high">High risk</span>
+          </div>
+          <div class="rm-detail-actions" style="margin-top:16px">
+            <button class="rm-detail-action">Edit</button>
+            <a class="rm-detail-action rm-detail-action--link" href="#">Open Runbook</a>
+            <button class="rm-detail-action rm-detail-action--danger">Delete</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    <script>
+      const root = document.getElementById('sandboxRoot');
+      const darkToggle = document.getElementById('darkModeToggle');
+      const themeSwitch = document.getElementById('themeSwitch');
+      darkToggle.addEventListener('change', () => {
+        document.body.classList.toggle('dark', darkToggle.checked);
+      });
+      themeSwitch.addEventListener('change', () => {
+        if (!root) return;
+        const value = themeSwitch.value;
+        if (!value || value === 'default') root.removeAttribute('data-theme');
+        else root.setAttribute('data-theme', value);
+      });
+    </script>
+  </body>
+</html>

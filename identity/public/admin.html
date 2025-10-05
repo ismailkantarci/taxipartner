@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>TAXIPartner Identity – Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Admin Panel – Users & Roles</h1>
+    <div class="mb-6">
+      <label class="block font-semibold">Kullanıcı ID</label>
+      <input id="userId" type="text" class="border rounded p-2 w-full" placeholder="örn. u123">
+    </div>
+
+    <div class="mb-6">
+      <label class="block font-semibold">Rol Seç</label>
+      <select id="roleSelect" class="border rounded p-2 w-full"></select>
+    </div>
+
+    <button id="assignBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Rol Ata</button>
+
+    <h2 class="text-xl font-bold mt-8 mb-2">Sonuç</h2>
+    <pre id="result" class="bg-white border rounded p-4 text-sm"></pre>
+  </div>
+  <script src="admin.js"></script>
+</body>
+</html>

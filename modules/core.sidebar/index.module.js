@@ -19,6 +19,38 @@ export function loadSidebar(target, user) {
     </nav>
   `;
 
+  try {
+    if (user?.roles?.includes('admin')) {
+      const nav = target.querySelector('nav');
+      const linkClass = 'block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300';
+      const entries = [
+        { id: 'sidebar-companies', hash: '#/companies', label: AppState.getTranslation('sidebar.companies') || 'Companies' },
+        { id: 'sidebar-tenants', hash: '#/tenants', label: AppState.getTranslation('sidebar.tenants') || 'Tenants' },
+        { id: 'sidebar-ous', hash: '#/ous', label: AppState.getTranslation('sidebar.ous') || 'OUs' }
+      ];
+      if (nav) {
+        entries.forEach(({ id, hash, label }) => {
+          if (nav.querySelector(`#${id}`)) return;
+          const anchor = document.createElement('a');
+          anchor.id = id;
+          anchor.href = hash;
+          anchor.className = linkClass;
+          anchor.textContent = label;
+          nav.appendChild(anchor);
+        });
+      }
+      import('../../frontend/bridge/routerBridge.ts')
+        .then((mod) => {
+          mod.probe({
+            'sidebar-companies': () => mod.goHash('#/companies'),
+            'sidebar-tenants': () => mod.goHash('#/tenants'),
+            'sidebar-ous': () => mod.goHash('#/ous')
+          });
+        })
+        .catch(() => {});
+    }
+  } catch {}
+
   const toggleButton = document.getElementById('toggleSidebar');
   const sidebar = document.getElementById('sidebar');
 
@@ -37,8 +69,11 @@ export function loadSidebar(target, user) {
     }
   }
 
-  // Initial offset (sidebar starts closed)
-  updateMainOffset(false);
+  const prefersOpen = window.innerWidth >= 768;
+  if (prefersOpen) {
+    sidebar?.classList.remove('-translate-x-full');
+  }
+  updateMainOffset(prefersOpen && !sidebar?.classList.contains('-translate-x-full'));
 
   if (toggleButton && sidebar) {
     toggleButton.addEventListener('click', () => {

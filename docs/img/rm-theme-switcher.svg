@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#e5e7eb"/>
+  <text x="60" y="80" font-family="Inter, Arial" font-size="26" fill="#111827">Theme selector</text>
+  <rect x="60" y="110" width="360" height="360" rx="24" fill="#ffffff" stroke="#cbd5f5" stroke-width="2"/>
+  <text x="90" y="150" font-family="Inter, Arial" font-size="20" fill="#1d4ed8">Default</text>
+  <rect x="90" y="170" width="120" height="36" rx="10" fill="#6366f1" opacity="0.12"/>
+  <text x="100" y="194" font-family="Inter, Arial" font-size="16" fill="#4338ca">Theme: Default</text>
+  <text x="90" y="230" font-family="Inter, Arial" font-size="14" fill="#475569">Cards use neutral white with indigo accents.</text>
+  <rect x="420" y="110" width="220" height="360" rx="24" fill="#111827" stroke="#334155" stroke-width="2"/>
+  <text x="450" y="150" font-family="Inter, Arial" font-size="20" fill="#facc15">High Contrast</text>
+  <text x="450" y="180" font-family="Inter, Arial" font-size="14" fill="#e2e8f0">Sharper borders and orange accents.</text>
+  <rect x="660" y="110" width="240" height="360" rx="24" fill="#ecfeff" stroke="#22d3ee" stroke-width="2"/>
+  <text x="690" y="150" font-family="Inter, Arial" font-size="20" fill="#0ea5e9">Brand</text>
+  <text x="690" y="180" font-family="Inter, Arial" font-size="14" fill="#0f172a">Cyan gradients and subtle glass backdrop.</text>
+</svg>

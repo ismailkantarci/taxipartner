@@ -59,8 +59,10 @@ export function validateRelease(r) {
       }
     }
   }
-  if (r.status && !['Stable','Beta','alpha','Alpha','Canary','canary'].includes(String(r.status))) {
-    errs.push('status:unknown');
+  if (r.status) {
+    const s = String(r.status).toLowerCase();
+    const allowed = new Set(['stable','beta','alpha','canary']);
+    if (!allowed.has(s)) errs.push('status:unknown');
   }
   if (r.description && typeof r.description === 'object') {
     const hasAny = r.description.tr || r.description.de || r.description.en;

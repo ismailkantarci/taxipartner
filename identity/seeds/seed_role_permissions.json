@@ -1,0 +1,131 @@
+{
+  "templates": [
+    {
+      "role": "Superadmin",
+      "scope": "global",
+      "allow": ["tp.*"],
+      "deny": []
+    },
+    {
+      "role": "Compliance Officer",
+      "scope": "global",
+      "allow": ["tp.gdpr.*", "tp.audit.read"],
+      "deny": ["tp.identity.user.*", "tp.finance.*", "tp.hr.*", "tp.vehicle.*", "tp.contract.*", "tp.partner.*"]
+    },
+    {
+      "role": "Wirtschaftsprüfer",
+      "scope": "global",
+      "allow": ["tp.finance.report.read", "tp.docs.read(masked)", "tp.audit.read"],
+      "deny": ["tp.docs.upload", "tp.identity.*", "tp.hr.*", "tp.vehicle.*", "tp.contract.*", "tp.partner.*"]
+    },
+    {
+      "role": "Internal Auditor",
+      "scope": "global",
+      "allow": ["tp.risk.*", "tp.audit.read"],
+      "deny": ["tp.finance.*:write", "tp.hr.*:write", "tp.vehicle.*:write", "tp.contract.*:write", "tp.partner.*:write"]
+    },
+    {
+      "role": "Kontroller",
+      "scope": "tenant",
+      "allow": ["tp.finance.report.read", "tp.hr.arbeitszeit.read"],
+      "deny": ["tp.docs.upload", "tp.identity.*", "tp.hr.*:write", "tp.finance.*:write", "tp.vehicle.*", "tp.contract.*", "tp.partner.*"]
+    },
+
+    {
+      "role": "Steuerberater",
+      "scope": "tenant",
+      "allow": ["tp.vorbuchhaltung.*", "tp.docs.read", "tp.docs.upload", "tp.finance.tax.*", "tp.finance.report.read"],
+      "deny": ["tp.identity.*", "tp.vehicle.*", "tp.hr.*:write"]
+    },
+    {
+      "role": "Avukat",
+      "scope": "tenant",
+      "allow": ["tp.gesellschaft.edit", "tp.docs.read"],
+      "deny": ["tp.finance.*", "tp.hr.*", "tp.vehicle.*"]
+    },
+    {
+      "role": "Handelsrechtliche GF",
+      "scope": "tenant",
+      "allow": ["tp.contract.*", "tp.partner.*", "tp.finance.report.read"],
+      "deny": ["tp.hr.*:write", "tp.vehicle.*:write"]
+    },
+    {
+      "role": "Gewerberechtliche GF",
+      "scope": "tenant",
+      "allow": ["tp.konzession.*", "tp.vehicle.control.*", "tp.finance.report.read"],
+      "deny": ["tp.hr.*", "tp.identity.*"]
+    },
+    {
+      "role": "HR Manager",
+      "scope": "tenant",
+      "allow": ["tp.hr.*", "tp.dienstplan.*"],
+      "deny": ["tp.finance.*:write", "tp.vehicle.*:write", "tp.contract.*:write"]
+    },
+    {
+      "role": "Fuhrparkleiter",
+      "scope": "tenant",
+      "allow": ["tp.vehicle.*", "tp.trafficFine.*"],
+      "deny": ["tp.finance.*", "tp.hr.*:write"]
+    },
+    {
+      "role": "Fahrer",
+      "scope": "tenant",
+      "allow": ["tp.driver.me.read", "tp.driver.me.update"],
+      "deny": ["tp.identity.*", "tp.finance.*", "tp.hr.*:write", "tp.vehicle.*:write"]
+    },
+    {
+      "role": "Mitarbeiter",
+      "scope": "tenant",
+      "allow": ["tp.docs.upload", "tp.tasks.read", "tp.tasks.write"],
+      "deny": ["tp.identity.*", "tp.finance.*:write"]
+    },
+    {
+      "role": "Gesellschafter",
+      "scope": "tenant",
+      "allow": ["tp.gesellschaft.read", "tp.finance.report.read"],
+      "deny": ["tp.docs.upload", "tp.hr.*:write", "tp.finance.*:write"]
+    },
+    {
+      "role": "Hauptgesellschafter",
+      "scope": "tenant",
+      "allow": ["tp.gesellschaft.read", "tp.gesellschaft.vote", "tp.finance.report.read"],
+      "deny": ["tp.docs.upload", "tp.hr.*:write", "tp.finance.*:write"]
+    },
+    {
+      "role": "Data Entry",
+      "scope": "tenant",
+      "allow": ["tp.docs.upload", "tp.vorbuchhaltung.add"],
+      "deny": ["tp.identity.*", "tp.finance.*:approve"]
+    },
+    {
+      "role": "Recruiter",
+      "scope": "tenant",
+      "allow": ["tp.hr.onboard.*"],
+      "deny": ["tp.finance.*", "tp.vehicle.*"]
+    },
+    {
+      "role": "Bank Viewer",
+      "scope": "tenant",
+      "allow": ["tp.finance.report.read"],
+      "deny": ["tp.docs.upload", "tp.identity.*", "tp.finance.*:write"]
+    },
+    {
+      "role": "Versicherungspartner",
+      "scope": "tenant",
+      "allow": ["tp.insurance.*"],
+      "deny": ["tp.finance.*", "tp.identity.*", "tp.hr.*"]
+    },
+    {
+      "role": "Notar",
+      "scope": "tenant",
+      "allow": ["tp.gesellschaft.sign", "tp.gesellschaft.read"],
+      "deny": ["tp.finance.*", "tp.identity.*", "tp.hr.*"]
+    },
+    {
+      "role": "Betriebsrat",
+      "scope": "tenant",
+      "allow": ["tp.hr.read"],
+      "deny": ["tp.hr.*:write", "tp.docs.upload", "tp.identity.*"]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#f1f5f9"/>
+  <rect x="40" y="40" width="640" height="460" rx="12" fill="#ffffff" stroke="#cbd5f5" stroke-width="2"/>
+  <rect x="40" y="40" width="80" height="40" rx="8" fill="#1d4ed8" opacity="0.1"/>
+  <text x="52" y="66" font-family="Inter, Arial" font-size="18" fill="#1d4ed8">Main View</text>
+  <rect x="700" y="40" width="220" height="460" rx="12" fill="#ffffff" stroke="#cbd5f5" stroke-width="2"/>
+  <rect x="700" y="40" width="220" height="60" rx="12" fill="#1d4ed8" opacity="0.12"/>
+  <text x="720" y="80" font-family="Inter, Arial" font-size="18" fill="#1d4ed8">Filter Drawer</text>
+  <rect x="720" y="110" width="180" height="40" rx="8" fill="#e0e7ff"/>
+  <text x="730" y="136" font-family="Inter, Arial" font-size="16" fill="#3730a3">Status</text>
+  <rect x="720" y="170" width="180" height="40" rx="8" fill="#e0e7ff"/>
+  <text x="730" y="196" font-family="Inter, Arial" font-size="16" fill="#3730a3">Module</text>
+  <rect x="720" y="230" width="180" height="40" rx="8" fill="#e0e7ff"/>
+  <text x="730" y="256" font-family="Inter, Arial" font-size="16" fill="#3730a3">Date Range</text>
+  <rect x="720" y="440" width="180" height="36" rx="18" fill="#1d4ed8"/>
+  <text x="765" y="464" font-family="Inter, Arial" font-size="16" fill="#ffffff">Apply</text>
+  <text x="60" y="120" font-family="Inter, Arial" font-size="20" fill="#1f2937">Release list content</text>
+  <text x="60" y="150" font-family="Inter, Arial" font-size="14" fill="#64748b">Viewport shrinks to reveal drawer under 768px.</text>
+</svg>

@@ -1,0 +1,56 @@
+{
+  "roles": [
+    {
+      "name": "Superadmin",
+      "scope": "global",
+      "is_system": true,
+      "is_exclusive": true,
+      "template": false
+    },
+    {
+      "name": "Compliance Officer",
+      "scope": "global",
+      "is_system": true,
+      "is_exclusive": true,
+      "template": false
+    },
+    {
+      "name": "Wirtschaftsprüfer",
+      "scope": "global",
+      "is_system": true,
+      "is_exclusive": true,
+      "template": false
+    },
+    {
+      "name": "Internal Auditor",
+      "scope": "global",
+      "is_system": true,
+      "is_exclusive": true,
+      "template": false
+    },
+    {
+      "name": "Kontroller",
+      "scope": "tenant",
+      "is_system": true,
+      "is_exclusive": true,
+      "template": false
+    },
+
+    { "name": "Steuerberater", "scope": "tenant", "template": true },
+    { "name": "Avukat", "scope": "tenant", "template": true },
+    { "name": "Handelsrechtliche GF", "scope": "tenant", "template": true },
+    { "name": "Gewerberechtliche GF", "scope": "tenant", "template": true },
+    { "name": "HR Manager", "scope": "tenant", "template": true },
+    { "name": "Fuhrparkleiter", "scope": "tenant", "template": true },
+    { "name": "Fahrer", "scope": "tenant", "template": true },
+    { "name": "Mitarbeiter", "scope": "tenant", "template": true },
+    { "name": "Gesellschafter", "scope": "tenant", "template": true },
+    { "name": "Hauptgesellschafter", "scope": "tenant", "template": true },
+    { "name": "Data Entry", "scope": "tenant", "template": true },
+    { "name": "Recruiter", "scope": "tenant", "template": true },
+    { "name": "Bank Viewer", "scope": "tenant", "template": true },
+    { "name": "Versicherungspartner", "scope": "tenant", "template": true },
+    { "name": "Notar", "scope": "tenant", "template": true },
+    { "name": "Betriebsrat", "scope": "tenant", "template": true }
+  ]
+}

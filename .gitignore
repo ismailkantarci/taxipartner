@@ -6,3 +6,10 @@ release-pack/
 dist/
 node_modules/
 *.log
+
+# Build artefacts & local DB snapshots
+/dist/
+/frontend/dist/
+/release-pack/
+/identity/dev.db
+/prisma/dev.db

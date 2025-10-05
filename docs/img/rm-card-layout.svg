@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Inter, Arial" font-size="26" fill="#1f2937">Responsive card layout</text>
+  <text x="60" y="100" font-family="Inter, Arial" font-size="16" fill="#64748b">Cards stack and reuse action icons below 900px.</text>
+  <g transform="translate(60 140)">
+    <rect width="260" height="180" rx="16" fill="#ffffff" stroke="#dbeafe" stroke-width="2"/>
+    <text x="20" y="40" font-family="Inter, Arial" font-size="24" fill="#1d4ed8">v1.4.2</text>
+    <rect x="20" y="60" width="80" height="24" rx="12" fill="#d9f99d"/>
+    <text x="28" y="78" font-family="Inter, Arial" font-size="14" fill="#166534">Stable</text>
+    <text x="20" y="110" font-family="Inter, Arial" font-size="16" fill="#334155">Alice · 2025-09-10</text>
+    <rect x="20" y="130" width="60" height="22" rx="11" fill="#e0e7ff"/>
+    <text x="26" y="146" font-family="Inter, Arial" font-size="13" fill="#4338ca">UI</text>
+    <rect x="88" y="130" width="80" height="22" rx="11" fill="#e0f2fe"/>
+    <text x="96" y="146" font-family="Inter, Arial" font-size="13" fill="#0ea5e9">Core API</text>
+  </g>
+  <g transform="translate(360 180)">
+    <rect width="260" height="180" rx="16" fill="#eef2ff" stroke="#c7d2fe" stroke-width="2"/>
+    <text x="20" y="40" font-family="Inter, Arial" font-size="24" fill="#3730a3">v1.4.1</text>
+    <text x="20" y="110" font-family="Inter, Arial" font-size="16" fill="#4b5563">Selected state highlights border.</text>
+  </g>
+  <g transform="translate(660 220)">
+    <rect width="220" height="140" rx="16" fill="#ffffff" stroke="#dbeafe" stroke-width="2"/>
+    <text x="20" y="60" font-family="Inter, Arial" font-size="18" fill="#1f2937">Actions</text>
+    <text x="20" y="90" font-family="Inter, Arial" font-size="14" fill="#64748b">JSON · MD · Copy</text>
+  </g>
+</svg>

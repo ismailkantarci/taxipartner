@@ -4,11 +4,11 @@ import { AppState } from '../core.state/app.state.module.js';
 const SettingsModule = {
   init(target) {
     target.innerHTML = `
-      <h1 class="text-xl font-bold text-gray-700 dark:text-gray-200 mb-6">${AppState.getTranslation('settings.title')}</h1>
-      <div class="space-y-4">
+      <h1 class="text-xl font-bold text-gray-700 dark:text-gray-200 mb-4">${AppState.getTranslation('settings.title')}</h1>
+      <div class="max-w-xl bg-white dark:bg-gray-900 border dark:border-gray-700 rounded p-4 space-y-4">
         <div>
           <label class="block text-sm text-gray-500 dark:text-gray-300 mb-1">${AppState.getTranslation('settings.language')}</label>
-          <select id="langSelect" class="w-full border dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded px-2 py-1 text-sm">
+          <select id="langSelect" class="w-full border dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             <option value="de-AT">Deutsch</option>
             <option value="tr">Türkçe</option>
             <option value="en">English</option>
@@ -16,14 +16,14 @@ const SettingsModule = {
         </div>
         <div>
           <label class="block text-sm text-gray-500 dark:text-gray-300 mb-1">${AppState.getTranslation('settings.theme')}</label>
-          <select id="themeSelect" class="w-full border dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded px-2 py-1 text-sm">
+          <select id="themeSelect" class="w-full border dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             <option value="light">${AppState.getTranslation('header.theme.light')}</option>
             <option value="dark">${AppState.getTranslation('header.theme.dark')}</option>
             <option value="system">${AppState.getTranslation('header.theme.system')}</option>
             <option value="autoSun">${AppState.getTranslation('header.theme.autoSun')}</option>
           </select>
         </div>
-        <div class="text-sm text-gray-600 dark:text-gray-300 mt-4">
+        <div class="text-sm text-gray-600 dark:text-gray-300 pt-2 border-t dark:border-gray-700">
           ${AppState.getTranslation('users.activeUser')}: <strong>${AppState.currentUser?.fullName || '---'}</strong>
         </div>
       </div>

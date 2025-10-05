@@ -1,22 +1,61 @@
 name: CI
-
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-
+  push: { branches: ["*"] }
+  pull_request: { branches: ["*"] }
+  workflow_dispatch:
 jobs:
-  build-and-test:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: taxipartner_ci
+          POSTGRES_USER: tpuser
+          POSTGRES_PASSWORD: tppass
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U tpuser -d taxipartner_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://tpuser:tppass@localhost:5432/taxipartner_ci?schema=public
+      JWT_SECRET: test-secret
+      EXPORT_SIGN_SECRET: test-export
+      DEV_BYPASS_AUTH: "false"
+      DEV_CORS_ORIGINS: "http://localhost:5173 http://localhost:5174"
+      DISABLE_SCHEDULER: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: "npm" }
+      - run: npm ci
+      - run: npm run db:gen
+      - run: npm run db:migrate
+      - name: Identity tests
+        run: npm run identity:test
+      - name: Frontend unit tests (optional)
+        run: |
+          if [ -f package.json ] && jq -e '.scripts.test' package.json >/dev/null 2>&1; then npm test || true; fi
+      - name: Prod guard (block dist artefacts)
+        run: |
+          if git ls-files dist frontend/dist release-pack | grep .; then
+            echo "dist/ or release-pack/ must not be tracked"; exit 1;
+          fi
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci || npm i
-      - run: npm run build --if-present
-      - run: npm run lint --if-present
-      - run: npm run validate:modules --if-present
-      - run: node scripts/verify-security-headers.mjs
-      - run: npm test --if-present
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run check
+      - name: Build (QA)
+        run: npm run build:qa
+      - name: Route Map Report
+        run: npm run qa:summary

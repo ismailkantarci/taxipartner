@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./tmp/smoke.db"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  mfaEnabled Boolean  @default(false)
+  mfaSecret  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  roles      UserRole[]
+  sessions   Session[]
+  externalLogins UserExternalLogin[]
+  claimsJson String?
+}
+
+model Role {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  scope       String
+  isSystem    Boolean   @default(false)
+  isExclusive Boolean   @default(false)
+  template    Boolean   @default(false)
+  users       UserRole[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+  @@id([userId, roleId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+}
+
+model Approval {
+  id              String   @id @default(cuid())
+  op              String
+  tenantId        String
+  targetId        String?
+  initiatorUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  status          String
+  approvalsJson   String
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  ts            DateTime @default(now())
+  actorId       String?
+  actorEmail    String?
+  tenantId      String?
+  action        String
+  method        String
+  path          String
+  targetType    String?
+  targetId      String?
+  status        Int
+  ip            String?
+  userAgent     String?
+  metaJson      String?
+
+  @@index([ts])
+  @@index([actorId])
+  @@index([tenantId])
+  @@index([action])
+}
+
+model UserExternalLogin {
+  id         String   @id @default(cuid())
+  provider   String
+  providerId String
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([provider, providerId])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  cron        String
+  isEnabled   Boolean  @default(true)
+  channels    String   // JSON: { email?: true, telegram?: true, inapp?: true }
+  payload     String?  // JSON: { subject, body, to?, userId?, tenantId? }
+  lastRunAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        TaskRun[]
+}
+
+model TaskRun {
+  id         String   @id @default(cuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id])
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  status     String   // "STARTED" | "SUCCESS" | "ERROR"
+  message    String?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  tenantId  String?
+  channel   String   // "email" | "telegram" | "inapp"
+  subject   String?
+  body      String?
+  metaJson  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tenantId])
+}

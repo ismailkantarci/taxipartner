@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#f8fafc"/>
+  <rect x="80" y="60" width="800" height="420" rx="28" fill="#ffffff" stroke="#dbeafe" stroke-width="2"/>
+  <text x="120" y="120" font-family="Inter, Arial" font-size="28" fill="#1f2937">Release Report</text>
+  <text x="120" y="156" font-family="Inter, Arial" font-size="16" fill="#475569">Generated: 2025-09-21 · Theme: Default</text>
+  <rect x="120" y="180" width="200" height="100" rx="16" fill="#eef2ff"/>
+  <text x="140" y="216" font-family="Inter, Arial" font-size="18" fill="#3730a3">Total</text>
+  <text x="140" y="246" font-family="Inter, Arial" font-size="28" fill="#111827">42</text>
+  <rect x="344" y="180" width="200" height="100" rx="16" fill="#dcfce7"/>
+  <text x="364" y="216" font-family="Inter, Arial" font-size="18" fill="#166534">Stable</text>
+  <text x="364" y="246" font-family="Inter, Arial" font-size="28" fill="#14532d">36</text>
+  <rect x="568" y="180" width="200" height="100" rx="16" fill="#cffafe"/>
+  <text x="588" y="216" font-family="Inter, Arial" font-size="18" fill="#0f172a">Latest</text>
+  <text x="588" y="246" font-family="Inter, Arial" font-size="24" fill="#0f172a">v1.4.2</text>
+  <rect x="120" y="300" width="720" height="140" rx="18" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="140" y="332" font-family="Inter, Arial" font-size="16" fill="#475569">Version · Date · Status · Author · Modules · Description</text>
+  <text x="140" y="366" font-family="Inter, Arial" font-size="14" fill="#64748b">Table exports respect current theme tokens.</text>
+</svg>

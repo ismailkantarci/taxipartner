@@ -1,4 +1,9 @@
-#!/bin/sh
-# Minimal Husky shim (no-op). Real init is handled by husky install if run.
-:
+echo "husky - DEPRECATED
 
+Please remove the following two lines from $0:
+
+#!/usr/bin/env sh
+. \"\$(dirname -- \"\$0\")/_/husky.sh\"
+
+They WILL FAIL in v10.0.0
+"

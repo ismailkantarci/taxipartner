@@ -1,0 +1,27 @@
+{
+  "exclusive": [
+    "Superadmin",
+    "Kontroller",
+    "Wirtschaftsprüfer",
+    "Compliance Officer",
+    "Internal Auditor"
+  ],
+  "pairs": [
+    ["Superadmin","ANY_OPERATIONAL"],
+    ["Kontroller","ANY_WRITE"],
+    ["Wirtschaftsprüfer","Steuerberater"],
+    ["Wirtschaftsprüfer","Data Entry"],
+    ["Wirtschaftsprüfer","Finance-Write"],
+    ["Compliance Officer","Identity-Write"],
+    ["Compliance Officer","HR Manager"],
+    ["Internal Auditor","Operations-Write"],
+    ["Avukat","Notar"],
+    ["Handelsrechtliche GF","Kontroller"],
+    ["Handelsrechtliche GF","Wirtschaftsprüfer"],
+    ["Handelsrechtliche GF","Internal Auditor"],
+    ["Gewerberechtliche GF","Kontroller"],
+    ["Gewerberechtliche GF","Wirtschaftsprüfer"],
+    ["Gewerberechtliche GF","Internal Auditor"],
+    ["Betriebsrat","HR Manager"]
+  ]
+}

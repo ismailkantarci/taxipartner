@@ -11,5 +11,21 @@ export default {
         <button id="cmp-new" class="px-4 py-2 bg-black text-white rounded">Yeni Şirket</button>
         <div id="companies-list" class="mt-4 text-sm text-gray-700">Henüz kayıt yok.</div>
       </div>`;
+    // GAP-FIX: bridge placeholder CTA to SPA hash route
+    import('../../frontend/bridge/routerBridge.ts')
+      .then((mod) => {
+        mod.probe({ 'cmp-new': () => mod.goHash('#/companies') });
+      })
+      .catch(() => {});
+    import('../../frontend/companies/page.ts')
+      .then((mod) => {
+        try {
+          const result = mod.mountCompaniesPage?.(target);
+          if (result && typeof result.then === 'function') {
+            result.catch(() => {});
+          }
+        } catch {}
+      })
+      .catch(() => {});
   }
 };

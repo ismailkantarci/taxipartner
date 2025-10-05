@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <defs>
+    <linearGradient id="brandBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#brandBg)" opacity="0.18"/>
+  <rect x="32" y="32" width="576" height="160" rx="18" fill="#ecfeff" stroke="#22d3ee" stroke-width="2"/>
+  <text x="56" y="80" font-family="Inter, Arial" font-size="24" fill="#0ea5e9">Brand theme</text>
+  <text x="56" y="112" font-family="Inter, Arial" font-size="16" fill="#0f172a">Cyan gradients and glass surfaces.</text>
+  <rect x="32" y="220" width="576" height="120" rx="18" fill="#ffffff" stroke="#22d3ee" stroke-width="2"/>
+  <text x="56" y="260" font-family="Inter, Arial" font-size="16" fill="#0f172a">Example row</text>
+</svg>

@@ -1,6 +1,6 @@
 {
   "name": "Dashboard",
-  "version": "1.3.415",
+  "version": "1.3.1092",
   "type": "functional",
   "entry": "index.module.js",
   "author": "Ismail",
