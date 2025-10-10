@@ -1,5 +1,42 @@
 [
   {
+    "version": "1.3.1096",
+    "date": "2025-10-10",
+    "time": "22:37",
+    "datetime": "2025-10-10T22:37:53+02:00",
+    "status": "Stable",
+    "author": "ismailkantarci",
+    "description": {
+      "en": "Automated release. Stability and performance improvements. Branch: main.",
+      "de": "Automatisches Release. Stabilität und Performance verbessert. Branch: main.",
+      "tr": "Otomatik sürüm. Kararlılık ve performans iyileştirildi. Branş: main."
+    },
+    "descriptionPublic": {
+      "en": "Automated release. Stability and performance improvements. Stability and user experience improved.",
+      "de": "Automatisches Release. Stabilität und Performance verbessert. Stabilität und Nutzererlebnis verbessert.",
+      "tr": "Otomatik sürüm. Kararlılık ve performans iyileştirildi. Stabilite ve deneyim daha iyi hale getirildi."
+    },
+    "modules": [],
+    "categories": [],
+    "counts": {
+      "added": 0,
+      "modified": 0,
+      "removed": 0
+    },
+    "filesTop": [],
+    "impact": "chore",
+    "risk": "low",
+    "quality": "auto",
+    "state": "draft",
+    "sources": [
+      "ci"
+    ],
+    "_commit": "f2aa838100335e8b4d99cd3b87c1f8f44b6f2100",
+    "_branch": "main",
+    "_range": "98a91c2371ae8bbbdc56bbad05a9e43c53943a32..f2aa838100335e8b4d99cd3b87c1f8f44b6f2100",
+    "_files": []
+  },
+  {
     "version": "1.3.1095",
     "date": "2025-10-10",
     "time": "18:40",

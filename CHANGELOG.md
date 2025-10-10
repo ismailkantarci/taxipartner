@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.3.1095 - 2025-10-10 (Stable)
+- Author: System
+- Automated release. Focus: other, Release Management, docs. Affected modules: AccessDenied, Analytics, Companies, Dashboard, NotFound, OUs, ReleaseManagement, Settings, Tenants, UserManagement, core.footer, core.header, core.moduleLoader, core.sidebar. Stability and performance improvements. Branch: main.
+
+## v1.3.1094 - 2025-10-10 (Stable)
+- Author: ismailkantarci
+- Automated release. Stability and performance improvements. Branch: main.
+
 ## v1.3.1093 - 2025-10-05 (Stable)
 - Author: ismailkantarci
 - Automated release. Stability and performance improvements. Branch: main.
