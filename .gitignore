@@ -25,3 +25,4 @@ identity/.env
 prisma/identity/dev.db
 prisma/identity/dev.db-journal
 *.DS_Store
+!.env.ci
