@@ -47,7 +47,7 @@
     "tasks:smoke": "npx tsx identity/scripts/task.smoke.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.17.1",
     "archiver": "^6.0.2",
     "cors": "^2.8.5",
     "express-rate-limit": "^7.3.1",
