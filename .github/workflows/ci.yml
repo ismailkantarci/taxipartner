@@ -28,7 +28,7 @@ jobs:
       DEV_CORS_ORIGINS: "http://localhost:5173 http://localhost:5174"
       DISABLE_SCHEDULER: "true"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: "npm" }
       - run: npm ci
@@ -47,7 +47,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -62,7 +62,7 @@ jobs:
   verify-mp18:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: "npm" }
       - run: npm ci
