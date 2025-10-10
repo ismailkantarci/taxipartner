@@ -1,4 +1,5 @@
 import express from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "./db.js";
 import { permissionGuard } from "./permissionGuard.js";
 import { scopeGuard } from "./scopeGuard.js";
@@ -17,6 +18,11 @@ async function ensureCompany(id: string, tenantId: string) {
   return prisma.company.findFirst({ where: { id, tenantId } });
 }
 
+async function ensureTenant(tenantId: string) {
+  if (!tenantId) return null;
+  return prisma.tenant.findUnique({ where: { id: tenantId } });
+}
+
 companiesRouter.get(
   "/",
   permissionGuard(["tp.company.read"]),
@@ -33,9 +39,9 @@ companiesRouter.get(
         tenantId,
         OR: q
           ? [
-              { legalName: { contains: q, mode: "insensitive" } },
-              { uid: { contains: q, mode: "insensitive" } },
-              { regNo: { contains: q, mode: "insensitive" } }
+              { legalName: { contains: q } },
+              { uid: { contains: q } },
+              { regNo: { contains: q } }
             ]
           : undefined
       },
@@ -56,23 +62,51 @@ companiesRouter.post(
       res.status(400).json({ ok: false, error: "tenantId zorunlu" });
       return;
     }
+    const tenant = await ensureTenant(tenantId);
+    if (!tenant) {
+      res.status(404).json({ ok: false, error: "Tenant bulunamadı" });
+      return;
+    }
     if (!legalName || !legalForm) {
       res
         .status(400)
         .json({ ok: false, error: "legalName ve legalForm zorunlu" });
       return;
     }
-    const company = await prisma.company.create({
-      data: {
-        tenantId,
-        legalName,
-        legalForm,
-        uid,
-        regNo,
-        status: status || "Active"
+    try {
+      const company = await prisma.company.create({
+        data: {
+          tenantId,
+          legalName,
+          legalForm,
+          uid,
+          regNo,
+          status: status || "Active"
+        }
+      });
+      res.status(201).json({ ok: true, company });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        res
+          .status(409)
+          .json({ ok: false, error: "Aynı isimde bir şirket zaten mevcut." });
+        return;
       }
-    });
-    res.status(201).json({ ok: true, company });
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2003"
+      ) {
+        res.status(400).json({
+          ok: false,
+          error: "Geçersiz tenant: lütfen önce bu tenantı oluşturun."
+        });
+        return;
+      }
+      throw error;
+    }
   }
 );
 

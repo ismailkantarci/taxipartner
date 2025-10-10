@@ -14,8 +14,8 @@ tenantsRouter.get(
       where: q
         ? {
             OR: [
-              { code: { contains: q, mode: "insensitive" } },
-              { name: { contains: q, mode: "insensitive" } }
+              { code: { contains: q } },
+              { name: { contains: q } }
             ]
           }
         : undefined,
@@ -41,9 +41,11 @@ tenantsRouter.post(
   }
 );
 
+// MP-18 Fix Pack: tenant assignments respect scope guard
 tenantsRouter.post(
   "/:id/users",
   permissionGuard(["tp.tenant.user.assign"]),
+  scopeGuard(),
   async (req, res) => {
     const { userId, role } = req.body || {};
     if (!userId) {

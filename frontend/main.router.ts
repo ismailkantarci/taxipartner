@@ -8,6 +8,10 @@ import { attachNotificationsRoute } from './notifications/routerAttach';
 import { attachTenantsRoute } from './tenants/routerAttach';
 import { attachCompaniesRoute } from './companies/routerAttach';
 import { attachOUsRoute } from './ous/routerAttach';
+// MP-18 Fix Pack: align SPA whitelist with module navigation
+const MP18_ALLOWED_ROUTES = ['#/users','#/permissions','#/audit','#/tasks','#/notifications','#/tenants','#/companies','#/ous','#/settings','#/analytics','#/releases','#/reports'];
+
+
 
 attachUsersRoute();
 attachPermissionsRoute();
@@ -30,16 +34,11 @@ export function attachRoutes() {
       mountInviteAccept(host);
       return;
     }
-    if (
-      hash.startsWith('#/users') ||
-      hash.startsWith('#/permissions') ||
-      hash.startsWith('#/audit') ||
-      hash.startsWith('#/tasks') ||
-      hash.startsWith('#/notifications') ||
-      hash.startsWith('#/tenants') ||
-      hash.startsWith('#/companies')
-    ) {
+    if (MP18_ALLOWED_ROUTES.some((route) => hash.startsWith(route))) {
       return;
+    }
+    if (hash && hash !== '#/users') {
+      alert('Bu sayfa yüklenemedi, kullanıcı bölümüne yönlendirildiniz.');
     }
     location.hash = '#/users';
   }

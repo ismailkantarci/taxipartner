@@ -5,7 +5,8 @@ import { z } from 'zod';
 import { prisma } from './db.js';
 import { hash, compare } from './crypto.js';
 import { sign, verifyToken } from './jwt.js';
-import { authGuard } from './authGuard.js';
+import { authGuard, ensureDevUser } from './authGuard.js';
+import { DEV_BYPASS_AUTH, DEV_BYPASS_EMAIL } from './env.js';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -73,6 +74,9 @@ router.post('/login', async (req, res) => {
     return;
   }
   const { email, password } = parsed.data;
+  if (DEV_BYPASS_AUTH && email === DEV_BYPASS_EMAIL) {
+    await ensureDevUser();
+  }
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     res.status(401).json({ ok: false, error: 'Geçersiz kimlik' });

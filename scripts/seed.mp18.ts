@@ -1,18 +1,24 @@
 import { prisma } from "../identity/src/db.js";
+import { hash } from "../identity/src/crypto.js";
 
 async function main() {
   const email = process.env.SEED_USER_EMAIL || "ui.test@taxipartner.test";
+  const passwordHash = await hash(process.env.SEED_USER_PASSWORD || "Admin!234");
   const user = await prisma.user.upsert({
     where: { email },
-    update: {},
-    create: { email, password: "dev-placeholder", mfaEnabled: false }
+    update: {
+      password: passwordHash,
+      mfaEnabled: false,
+      mfaSecret: null
+    },
+    create: { email, password: passwordHash, mfaEnabled: false }
   });
 
-  const tcode = process.env.SEED_TENANT_CODE || "tp-demo";
+  const code = process.env.SEED_TENANT_CODE || "tp-demo";
   const tenant = await prisma.tenant.upsert({
-    where: { code: tcode },
+    where: { code },
     update: {},
-    create: { code: tcode, name: "TAXIPartner Demo" }
+    create: { code, name: "TAXIPartner Demo" }
   });
 
   await prisma.tenantUser.upsert({
@@ -21,13 +27,12 @@ async function main() {
     create: { tenantId: tenant.id, userId: user.id, role: "Admin" }
   });
 
-  console.log("[SEED] user:", user.email, "tenant:", tenant.code);
-  console.log("[SEED] OK – use tenantId:", tenant.id, "in x-tenant-id header");
+  console.log("[SEED] user:", user.email, "tenant:", tenant.code, "tenantId:", tenant.id);
 }
 
 main()
-  .catch((e) => {
-    console.error("[SEED] Error:", e?.message || e);
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   })
   .finally(async () => {

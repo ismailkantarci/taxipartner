@@ -1,6 +1,6 @@
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 export function applySecurity(app: any) {
   app.use(helmet());
@@ -26,5 +26,10 @@ export function applySecurity(app: any) {
       credentials: true
     })
   );
-  app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    keyGenerator: (req: any) => req?.user?.id || req.headers['x-tenant-id'] || ipKeyGenerator(req.ip),
+    message: { ok: false, error: 'Too many requests, please wait a moment.' }
+  }));
 }

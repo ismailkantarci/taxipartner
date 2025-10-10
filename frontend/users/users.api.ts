@@ -1,6 +1,6 @@
-const API_BASE = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
-
 import type { Paging, UserDetail, UserSummary } from './types';
+
+const API_BASE = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
 
 export type ListResponse = { ok: boolean; users: UserSummary[]; paging: Paging; error?: string };
 export type DetailResponse = { ok: boolean; user: UserDetail; error?: string };
@@ -11,14 +11,16 @@ export type PermissionsResponse = { ok: boolean; allow: string[]; error?: string
 export type RemoveRoleResponse = { ok: boolean; user?: UserDetail; error?: string };
 
 function buildUrl(path: string, params?: Record<string, string | number | undefined | null>) {
-  const url = new URL(API_BASE + path);
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value === undefined || value === null || value === '') continue;
-      url.searchParams.set(key, String(value));
-    }
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const target = `${API_BASE}${normalizedPath}` || normalizedPath;
+  if (!params) return target;
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === '') continue;
+    search.set(key, String(value));
   }
-  return url.toString();
+  const query = search.toString();
+  return query ? `${target}?${query}` : target;
 }
 
 function readToken(): string | null {
@@ -52,11 +54,11 @@ export async function listUsers(q = '', skip = 0, take = 50): Promise<ListRespon
 }
 
 export async function getUser(id: string): Promise<DetailResponse> {
-  return jsonFetch<DetailResponse>(`${API_BASE}/api/users/${id}`, { headers: authz() });
+  return jsonFetch<DetailResponse>(buildUrl(`/api/users/${id}`), { headers: authz() });
 }
 
 export async function createUser(email?: string): Promise<CreateResponse> {
-  return jsonFetch<CreateResponse>(`${API_BASE}/api/users`, {
+  return jsonFetch<CreateResponse>(buildUrl('/api/users'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authz() },
     body: JSON.stringify({ email })
@@ -67,7 +69,7 @@ export async function assignRole(
   userId: string,
   body: { role: string; claims?: unknown | null }
 ): Promise<AssignResponse> {
-  return jsonFetch<AssignResponse>(`${API_BASE}/api/users/${userId}/assign`, {
+  return jsonFetch<AssignResponse>(buildUrl(`/api/users/${userId}/assign`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authz() },
     body: JSON.stringify(body)
@@ -75,21 +77,21 @@ export async function assignRole(
 }
 
 export async function revokeSessions(userId: string): Promise<RevokeResponse> {
-  return jsonFetch<RevokeResponse>(`${API_BASE}/api/users/${userId}/revoke`, {
+  return jsonFetch<RevokeResponse>(buildUrl(`/api/users/${userId}/revoke`), {
     method: 'POST',
     headers: { ...authz() }
   });
 }
 
 export async function getUserPermissions(userId: string): Promise<PermissionsResponse> {
-  return jsonFetch<PermissionsResponse>(`${API_BASE}/api/users/${userId}/permissions`, {
+  return jsonFetch<PermissionsResponse>(buildUrl(`/api/users/${userId}/permissions`), {
     headers: authz()
   });
 }
 
 export async function removeRole(userId: string, role: string): Promise<RemoveRoleResponse> {
   return jsonFetch<RemoveRoleResponse>(
-    `${API_BASE}/api/users/${userId}/roles/${encodeURIComponent(role)}`,
+    buildUrl(`/api/users/${userId}/roles/${encodeURIComponent(role)}`),
     {
       method: 'DELETE',
       headers: authz()

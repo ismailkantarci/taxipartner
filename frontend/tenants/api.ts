@@ -1,6 +1,20 @@
 import { t } from '../i18n/index';
 
-const API = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
+const API_BASE = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
+
+function buildUrl(path: string, params?: Record<string, string | number | undefined>) {
+  const base = API_BASE;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const target = `${base}${normalizedPath}` || normalizedPath;
+  if (!params) return target;
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    search.set(key, String(value));
+  });
+  const query = search.toString();
+  return query ? `${target}?${query}` : target;
+}
 
 function authHeaders() {
   const token = localStorage.getItem('token');
@@ -13,16 +27,14 @@ async function asJson(response: Response) {
 }
 
 export async function listTenants(query = '') {
-  const url = new URL(`${API}/tenants`);
-  if (query) url.searchParams.set('q', query);
-  const response = await fetch(url.toString(), {
+  const response = await fetch(buildUrl('/tenants', { q: query }), {
     headers: authHeaders()
   });
   return asJson(response);
 }
 
 export async function createTenant(body: any) {
-  const response = await fetch(`${API}/tenants`, {
+  const response = await fetch(buildUrl('/tenants'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body)
@@ -31,7 +43,7 @@ export async function createTenant(body: any) {
 }
 
 export async function assignTenantUser(tenantId: string, body: any) {
-  const response = await fetch(`${API}/tenants/${encodeURIComponent(tenantId)}/users`, {
+  const response = await fetch(buildUrl(`/tenants/${encodeURIComponent(tenantId)}/users`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body)

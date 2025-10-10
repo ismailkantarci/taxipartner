@@ -177,6 +177,7 @@ model Company {
   shareholders Shareholder[]
   documents   CompanyDocument[]
   @@index([tenantId])
+  @@unique([tenantId, legalName])
 }
 
 model CompanyOfficer {

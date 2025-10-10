@@ -460,3 +460,39 @@ Expected:
   node --loader tsx scripts/ui_wiring_check.mjs
   # rapor: REPORTS/ui_wiring_check.md
   ```b1192d5 (chore: sync local project state)
+
+## Full Audit V2 – Fix Pack Usage
+1. **Router & Modules**: SPA hash whitelist now includes `#/tenants`, `#/companies`, `#/ous`, `#/settings`, `#/analytics`, `#/releases`, `#/reports`.
+2. **Test Endpoints**: QA smoke checks available under `/test/rate`, `/test/error500`, `/test/slow`, `/test/401`.
+3. **Tenant Security**: OU mutations and tenant-user assignments enforce `scopeGuard`; always forward the correct `x-tenant-id` header.
+4. **i18n Loader**: `frontend/i18n/loader.ts` merges `locales/*.json` into the runtime dictionary without clobbering module-defined keys.
+5. **Notifications Security**: Mark-read and mark-all APIs validate the authenticated principal before mutating records.
+6. **Seed & Verify**:
+   ```bash
+   npm run db:ensure
+   npm run seed:mp18
+   VERIFY_BASE=http://localhost:3000 npm run verify:mp18
+   ```
+
+## Post-FixPack Usage
+If verification report showed DB/seed/verify errors:
+```bash
+npm run db:reset      # optional — WIP environments
+npm run db:ensure
+npm run seed:mp18
+VERIFY_BASE=http://localhost:3000 npm run verify:mp18
+```
+If Node 20 shows “--loader tsx” error, all QA scripts now use `node --import tsx`.
+
+## SaaS Deployment Notes
+- Development uses SQLite (`file:../prisma/identity/dev.db`).
+- Production should use PostgreSQL:
+  ```
+  DATABASE_URL="postgresql://tpuser:tppass@localhost:5432/taxipartner?schema=public"
+  ```
+- TenantId in forms is now read-only and auto-filled.
+- Company names are unique per tenant.
+- Rate limit protects API abuse.
+- Error messages now appear as localized toast notifications.
+- CI pipeline stops on failures and uploads reports.
+

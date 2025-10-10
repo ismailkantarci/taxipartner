@@ -44,13 +44,16 @@ notificationsRouter.get('/unread/count', async (req: AuthedRequest, res: Respons
   }
 });
 
+// MP-18 Fix Pack: lock mark-all to current principal
 notificationsRouter.post('/unread/mark-all', async (req: AuthedRequest, res: Response) => {
   try {
-    const where: Record<string, unknown> = { isRead: false };
     const currentUserId = req.user?.id;
-    const userId = (req.body?.userId as string | undefined) ?? currentUserId ?? undefined;
+    if (!currentUserId) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
     const tenantId = req.body?.tenantId as string | undefined;
-    if (userId) where.userId = userId;
+    const where: Record<string, unknown> = { isRead: false, userId: currentUserId };
     if (tenantId) where.tenantId = tenantId;
 
     const result = await prisma.notification.updateMany({ where, data: { isRead: true } });
@@ -60,14 +63,25 @@ notificationsRouter.post('/unread/mark-all', async (req: AuthedRequest, res: Res
   }
 });
 
-notificationsRouter.post('/:id/read', async (req, res) => {
+// MP-18 Fix Pack: ensure notification mark-read respects ownership
+notificationsRouter.post('/:id/read', async (req: AuthedRequest, res: Response) => {
   try {
+    const currentUserId = req.user?.id;
+    if (!currentUserId) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+    const item = await prisma.notification.findUnique({ where: { id: req.params.id } });
+    if (!item || item.userId !== currentUserId) {
+      res.status(404).json({ ok: false, error: 'Not found' });
+      return;
+    }
     await prisma.notification.update({ where: { id: req.params.id }, data: { isRead: true } });
     res.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error && error.message.includes('Record to update not found')
-      ? 'Bildirim bulunamadı'
+      ? 'Not found'
       : 'Bildirim güncellenemedi';
-    res.status(message === 'Bildirim bulunamadı' ? 404 : 400).json({ ok: false, error: message });
+    res.status(message == 'Not found' ? 404 : 400).json({ ok: false, error: message });
   }
 });

@@ -49,6 +49,11 @@ app.use(langHint);
 
 app.use('/sso', ssoRouter);
 attachAudit(app);
+// Repair Apply: mount test endpoints for QA/smoke
+try {
+  const { testRouter } = await import('./test.routes.js');
+  app.use('/test', testRouter);
+} catch {}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

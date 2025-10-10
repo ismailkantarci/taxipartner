@@ -325,6 +325,7 @@ export function loadHeader(target, user) {
     tenantSelectDropdown.addEventListener("change", (e) => {
       const newTenantId = e.target.value;
       localStorage.setItem('selectedTenantId', newTenantId);
+      localStorage.setItem('tp_tenantId', newTenantId);
       AppState.setTenant(newTenantId);
       syncTenantSelects(newTenantId);
     });
@@ -334,6 +335,7 @@ export function loadHeader(target, user) {
     tenantSelectHeader.addEventListener("change", (e) => {
       const newTenantId = e.target.value;
       localStorage.setItem('selectedTenantId', newTenantId);
+      localStorage.setItem('tp_tenantId', newTenantId);
       AppState.setTenant(newTenantId);
       syncTenantSelects(newTenantId);
     });

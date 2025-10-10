@@ -1,6 +1,19 @@
 import { t } from '../i18n/index';
 
-const API = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
+const API_BASE = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
+
+function buildUrl(path: string, params?: Record<string, string | number | undefined>) {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const target = `${API_BASE}${normalizedPath}` || normalizedPath;
+  if (!params) return target;
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    search.set(key, String(value));
+  });
+  const query = search.toString();
+  return query ? `${target}?${query}` : target;
+}
 
 function authHeaders() {
   const token = localStorage.getItem('token');
@@ -13,17 +26,14 @@ async function asJson(response: Response) {
 }
 
 export async function listCompanies(tenantId: string, query = '') {
-  const url = new URL(`${API}/companies`);
-  if (tenantId) url.searchParams.set('tenantId', tenantId);
-  if (query) url.searchParams.set('q', query);
-  const response = await fetch(url.toString(), {
+  const response = await fetch(buildUrl('/companies', { tenantId, q: query }), {
     headers: { ...authHeaders(), 'x-tenant-id': tenantId }
   });
   return asJson(response);
 }
 
 export async function createCompany(tenantId: string, body: any) {
-  const response = await fetch(`${API}/companies`, {
+  const response = await fetch(buildUrl('/companies'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,16 +46,14 @@ export async function createCompany(tenantId: string, body: any) {
 }
 
 export async function getCompany(id: string, tenantId: string) {
-  const url = new URL(`${API}/companies/${encodeURIComponent(id)}`);
-  if (tenantId) url.searchParams.set('tenantId', tenantId);
-  const response = await fetch(url.toString(), {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(id)}`, { tenantId }), {
     headers: { ...authHeaders(), 'x-tenant-id': tenantId }
   });
   return asJson(response);
 }
 
 export async function updateCompany(id: string, tenantId: string, body: any) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(id)}`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(id)}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -58,7 +66,7 @@ export async function updateCompany(id: string, tenantId: string, body: any) {
 }
 
 export async function deleteCompany(id: string, tenantId: string) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(id)}`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(id)}`), {
     method: 'DELETE',
     headers: { ...authHeaders(), 'x-tenant-id': tenantId }
   });
@@ -66,7 +74,7 @@ export async function deleteCompany(id: string, tenantId: string) {
 }
 
 export async function addOfficer(companyId: string, tenantId: string, payload: any) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(companyId)}/officers`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(companyId)}/officers`), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -79,7 +87,7 @@ export async function addOfficer(companyId: string, tenantId: string, payload: a
 }
 
 export async function removeOfficer(companyId: string, officerId: string, tenantId: string) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(companyId)}/officers/${encodeURIComponent(officerId)}`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(companyId)}/officers/${encodeURIComponent(officerId)}`), {
     method: 'DELETE',
     headers: { ...authHeaders(), 'x-tenant-id': tenantId }
   });
@@ -87,7 +95,7 @@ export async function removeOfficer(companyId: string, officerId: string, tenant
 }
 
 export async function addShareholder(companyId: string, tenantId: string, payload: any) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(companyId)}/shareholders`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(companyId)}/shareholders`), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -100,7 +108,7 @@ export async function addShareholder(companyId: string, tenantId: string, payloa
 }
 
 export async function removeShareholder(companyId: string, shareholderId: string, tenantId: string) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(companyId)}/shareholders/${encodeURIComponent(shareholderId)}`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(companyId)}/shareholders/${encodeURIComponent(shareholderId)}`), {
     method: 'DELETE',
     headers: { ...authHeaders(), 'x-tenant-id': tenantId }
   });
@@ -108,7 +116,7 @@ export async function removeShareholder(companyId: string, shareholderId: string
 }
 
 export async function addCompanyDoc(companyId: string, tenantId: string, payload: any) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(companyId)}/documents`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(companyId)}/documents`), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -121,7 +129,7 @@ export async function addCompanyDoc(companyId: string, tenantId: string, payload
 }
 
 export async function removeCompanyDoc(companyId: string, docId: string, tenantId: string) {
-  const response = await fetch(`${API}/companies/${encodeURIComponent(companyId)}/documents/${encodeURIComponent(docId)}`, {
+  const response = await fetch(buildUrl(`/companies/${encodeURIComponent(companyId)}/documents/${encodeURIComponent(docId)}`), {
     method: 'DELETE',
     headers: { ...authHeaders(), 'x-tenant-id': tenantId }
   });

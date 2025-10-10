@@ -46,6 +46,7 @@ ousRouter.post(
   }
 );
 
+// MP-18 Fix Pack: enforce tenant scoping on OU mutations
 ousRouter.put(
   "/:id",
   permissionGuard(["tp.ou.create"]),

@@ -13,14 +13,14 @@ auditRouter.get('/', async (req: any, res: any) => {
 
     if (q) {
       where.OR = [
-        { action: { contains: q, mode: 'insensitive' } },
-        { path: { contains: q, mode: 'insensitive' } },
-        { actorEmail: { contains: q, mode: 'insensitive' } }
+        { action: { contains: q } },
+        { path: { contains: q } },
+        { actorEmail: { contains: q } }
       ];
     }
     if (actorId) where.actorId = actorId;
     if (tenantId) where.tenantId = tenantId;
-    if (action) where.action = { contains: action, mode: 'insensitive' };
+    if (action) where.action = { contains: action };
     if (status) where.status = Number(status);
     if (from || to) {
       where.ts = {
@@ -62,14 +62,14 @@ auditRouter.get('/export/csv', async (req: any, res: any) => {
 
     if (q) {
       where.OR = [
-        { action: { contains: q, mode: 'insensitive' } },
-        { path: { contains: q, mode: 'insensitive' } },
-        { actorEmail: { contains: q, mode: 'insensitive' } }
+        { action: { contains: q } },
+        { path: { contains: q } },
+        { actorEmail: { contains: q } }
       ];
     }
     if (actorId) where.actorId = actorId;
     if (tenantId) where.tenantId = tenantId;
-    if (action) where.action = { contains: action, mode: 'insensitive' };
+    if (action) where.action = { contains: action };
     if (status) where.status = Number(status);
     if (from || to) {
       where.ts = {

@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from './db.js';
+import { hash } from './crypto.js';
 
 export type RepoUser = {
   id: string;
@@ -49,8 +50,8 @@ export async function repoListUsers(q?: string, skip = 0, take = 50): Promise<Re
       where: q
         ? {
             OR: [
-              { email: { contains: q, mode: 'insensitive' } },
-              { id: { contains: q, mode: 'insensitive' } }
+              { email: { contains: q } },
+              { id: { contains: q } }
             ]
           }
         : undefined,
@@ -81,8 +82,8 @@ export async function repoCountUsers(q?: string): Promise<number> {
       where: q
         ? {
             OR: [
-              { email: { contains: q, mode: 'insensitive' } },
-              { id: { contains: q, mode: 'insensitive' } }
+              { email: { contains: q } },
+              { id: { contains: q } }
             ]
           }
         : undefined
@@ -122,10 +123,11 @@ export async function repoGetUser(id: string): Promise<RepoUser | null> {
 
 export async function repoCreateUser(email?: string): Promise<RepoUser> {
   try {
+    const passwordHash = await hash('dev-placeholder');
     const user = await prisma.user.create({
       data: {
         email: email ?? `user${Date.now()}@example.com`,
-        password: 'dev-placeholder'
+        password: passwordHash
       },
       include: { roles: { include: { role: true } }, sessions: true }
     });

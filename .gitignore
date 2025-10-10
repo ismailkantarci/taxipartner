@@ -13,3 +13,15 @@ node_modules/
 /release-pack/
 /identity/dev.db
 /prisma/dev.db
+.DS_Store
+.env
+/.env.*
+identity/.env
+prisma/identity/dev.db
+prisma/identity/dev.db-journal
+REPORTS/
+.env
+identity/.env
+prisma/identity/dev.db
+prisma/identity/dev.db-journal
+*.DS_Store

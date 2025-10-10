@@ -60,3 +60,4 @@ Migrate komutlarını sadece yeni migration geldiğini biliyorsan çalıştır (
 ## Faydalı Notlar
 - `DEV_BYPASS_AUTH=true` development’ta otomatik login sağlar; production’da `false` olmalı.
 - Her terminali kapatırken `Ctrl + C` kullan. Arka planda çalışan örneği kapatmadan yeni bir tane başlatma.
+- Identity kaynaklarında `import ... assert { type: 'json' }` kullanımları Node 20 sonrası kaldırılacağından, uygun zamanda `with { type: 'json' }` sözdizimine geçilmesi gerekiyor (not: 2025-10-09).

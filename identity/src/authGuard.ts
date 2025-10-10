@@ -3,8 +3,9 @@ import type { NextFunction, Request, Response } from 'express';
 import { prisma } from './db.js';
 import { verifyToken } from './jwt.js';
 import { DEV_BYPASS_AUTH, DEV_BYPASS_EMAIL } from './env.js';
+import { hash } from './crypto.js';
 
-async function ensureDevUser() {
+export async function ensureDevUser() {
   const role = await prisma.role.upsert({
     where: { name: 'Superadmin' },
     update: {},
@@ -17,12 +18,18 @@ async function ensureDevUser() {
     }
   });
 
+  const passwordHash = await hash('Admin!234');
+
   const user = await prisma.user.upsert({
     where: { email: DEV_BYPASS_EMAIL },
-    update: {},
+    update: {
+      password: passwordHash,
+      mfaEnabled: false,
+      mfaSecret: null
+    },
     create: {
       email: DEV_BYPASS_EMAIL,
-      password: 'dev-bypass-placeholder',
+      password: passwordHash,
       mfaEnabled: false
     }
   });
@@ -48,13 +55,7 @@ export async function authGuard(req: Request, res: Response, next: NextFunction)
         console.log('[authGuard] DEV_BYPASS_AUTH aktif, kullanıcı:', DEV_BYPASS_EMAIL);
         devBypassLogged = true;
       }
-      let user = await prisma.user.findUnique({
-        where: { email: DEV_BYPASS_EMAIL },
-        include: { roles: { include: { role: true } } }
-      });
-      if (!user) {
-        user = await ensureDevUser();
-      }
+      const user = await ensureDevUser();
       (req as any).user = {
         id: user.id,
         email: user.email,

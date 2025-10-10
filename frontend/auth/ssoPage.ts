@@ -1,5 +1,11 @@
 const API_BASE = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
 
+function resolve(path: string) {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const target = `${API_BASE}${normalizedPath}` || normalizedPath;
+  return target;
+}
+
 export function mountSSO(root: HTMLElement) {
   const { code, state, error: queryError } = parseQuery();
 
@@ -25,7 +31,8 @@ export function mountSSO(root: HTMLElement) {
   button.style.background = '#111827';
   button.style.color = '#fff';
   button.onclick = () => {
-    window.location.href = `${API_BASE}/sso/login?provider=oidc`;
+    const loginUrl = `${resolve('/sso/login')}?provider=oidc`;
+    window.location.href = loginUrl;
   };
   container.append(button);
 
@@ -54,12 +61,13 @@ export function mountSSO(root: HTMLElement) {
 
   async function exchange(authCode: string, stateParam?: string) {
     try {
-      const url = new URL(`${API_BASE}/sso/callback`);
+      const callbackUrl = resolve('/sso/callback');
+      const url = new URL(callbackUrl, window.location.origin);
       url.searchParams.set('code', authCode);
       if (stateParam) {
         url.searchParams.set('state', stateParam);
       }
-      const response = await fetch(url, { credentials: 'include' });
+      const response = await fetch(url.toString(), { credentials: 'include' });
       const payload = await response.json();
       if (!response.ok || !payload.ok) {
         output.textContent = payload.error ?? 'SSO girişinde hata oluştu.';

@@ -118,9 +118,32 @@ export async function mountCompaniesPage(root: HTMLElement) {
     }
   } catch {}
 
-  const storedTenantId = localStorage.getItem('tp_tenantId');
+  function resolveTenantId(): string {
+    const rawStored = localStorage.getItem('tp_tenantId');
+    if (rawStored) return rawStored;
+    try {
+      const savedAppState = JSON.parse(localStorage.getItem('AppState') || 'null');
+      if (savedAppState && typeof savedAppState.tenant === 'string' && savedAppState.tenant.trim()) {
+        return savedAppState.tenant.trim();
+      }
+    } catch {}
+    try {
+      const fromGlobal = (window as any).AppStateRef?.tenant;
+      if (typeof fromGlobal === 'string' && fromGlobal.trim()) {
+        return fromGlobal.trim();
+      }
+    } catch {}
+    return '';
+  }
+
+  const storedTenantId = resolveTenantId();
   if (storedTenantId && !tenantInput.value) {
     tenantInput.value = storedTenantId;
+    tenantInput.readOnly = true;
+    tenantInput.classList.add('readonly');
+  } else if (!storedTenantId) {
+    tenantInput.readOnly = false;
+    tenantInput.classList.remove('readonly');
   }
 
   tenantInput.addEventListener('keydown', (event) => {
@@ -183,6 +206,12 @@ export async function mountCompaniesPage(root: HTMLElement) {
   loadList().catch((error) => console.error(error));
 
   async function loadList(selectId?: string | null) {
+    const autoTenant = resolveTenantId();
+    if (autoTenant) {
+      tenantInput.value = autoTenant;
+      tenantInput.readOnly = true;
+      tenantInput.classList.add('readonly');
+    }
     const tenantId = tenantInput.value.trim();
     const query = searchInput.value.trim();
     detailEl.innerHTML = '';
@@ -523,31 +552,93 @@ export async function mountCompaniesPage(root: HTMLElement) {
 }
 
 function getShell() {
+  const title = t('companies') ?? 'Companies';
+  const tenantLabel = t('tenantId') ?? 'Tenant ID';
+  const searchLabel = t('search') ?? 'Search';
+  const nameLabel = t('legalName') ?? 'Legal name';
+  const formLabel = t('legalForm') ?? 'Legal form';
+  const createLabel = t('create') ?? 'Create';
+  const reloadLabel = t('reload') ?? 'Reload';
+  const exportLabel = t('export') ?? 'Export';
   return `
-    <div class="companies-wrap">
-      <div class="controls">
-        <label class="label">${esc(t('tenantId') ?? 'tenantId')}</label>
-        <input id="companies-tenant" class="input" placeholder="${esc(t('tenantId') ?? 'tenantId')}" />
-        <label class="label">${esc(t('search') ?? 'Search')}</label>
-        <div class="search-row">
-          <input id="companies-search" class="input" placeholder="${esc(t('search') ?? 'Search')}" />
-          <button class="btn" data-action="refresh">${esc(t('reload') ?? 'Reload')}</button>
-          <button class="btn" data-action="csv">${esc(t('export') ?? 'Export')}</button>
+    <style>
+      .companies-shell{padding:20px;display:flex;flex-direction:column;gap:16px;font-family:ui-sans-serif;}
+      .companies-shell .card{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;}
+      .companies-shell .card-title{font-size:18px;font-weight:600;color:#0f172a;margin-bottom:4px;}
+      .companies-shell .card-sub{color:#64748b;font-size:13px;margin-bottom:12px;}
+      .companies-shell .field{display:flex;flex-direction:column;gap:6px;}
+      .companies-shell .label{font-size:12px;font-weight:600;color:#475569;}
+      .companies-shell input[readonly]{background:#f3f4f6;color:#4b5563;cursor:not-allowed;}
+      .companies-shell .filters-grid{display:flex;flex-wrap:wrap;gap:16px;}
+      .companies-shell .inline-group{display:flex;gap:8px;align-items:center;}
+      .companies-shell .inline-group input{flex:1;}
+      .companies-shell .create-grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;}
+      .companies-shell .create-grid .actions{text-align:right;}
+      .companies-shell .content-grid{display:grid;grid-template-columns:260px 1fr;gap:16px;}
+      @media (max-width:900px){.companies-shell .content-grid{grid-template-columns:1fr;}}
+      .companies-shell .list-card{display:flex;flex-direction:column;gap:8px;}
+      .companies-shell .list-item{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;text-align:left;background:#fff;transition:background .2s,border-color .2s;}
+      .companies-shell .list-item .title{font-weight:600;color:#0f172a;}
+      .companies-shell .list-item .meta{font-size:12px;color:#64748b;margin-top:2px;}
+      .companies-shell .list-item:hover{border-color:#cbd5f5;}
+      .companies-shell .list-item.active{border-color:#1d4ed8;background:#eef2ff;}
+      .companies-shell .list-item.active .meta{color:#1e3a8a;}
+      .companies-shell .empty{padding:18px;border-radius:10px;background:#f8fafc;color:#64748b;text-align:center;}
+      .companies-shell .detail-card{display:flex;flex-direction:column;gap:16px;}
+      .companies-shell .detail-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+      .companies-shell .detail-header h3{margin:0;font-size:18px;font-weight:600;color:#0f172a;}
+      .companies-shell .detail-header .meta{color:#64748b;font-size:12px;}
+      .companies-shell .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+      .companies-shell section[data-section]{border-top:1px solid #e2e8f0;padding-top:12px;}
+      .companies-shell section[data-section] h4{margin:0 0 8px;font-size:15px;font-weight:600;color:#0f172a;}
+      .companies-shell .list-block{display:flex;flex-direction:column;gap:8px;}
+      .companies-shell .item-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;}
+      .companies-shell .item-row .title{font-weight:600;color:#0f172a;}
+      .companies-shell .item-row .meta{font-size:12px;color:#64748b;margin-top:2px;}
+      .companies-shell .form-row{display:flex;flex-wrap:wrap;gap:8px;}
+      .companies-shell .form-row.column{flex-direction:column;align-items:flex-start;}
+      .companies-shell .btn.primary{background:#1d4ed8;color:#ffffff;}
+      .companies-shell .btn.danger{background:#dc2626;color:#ffffff;}
+    </style>
+    <div class="companies-shell">
+      <div class="card filters-card">
+        <div class="card-title">${esc(title)}</div>
+        <div class="card-sub">${esc(t('selectRecord') ?? 'Select a tenant and manage companies')}</div>
+        <div class="filters-grid">
+          <div class="field">
+            <label class="label">${esc(tenantLabel)}</label>
+            <input id="companies-tenant" class="input" placeholder="${esc(tenantLabel)}" />
+          </div>
+          <div class="field" style="flex:1;min-width:240px;">
+            <label class="label">${esc(searchLabel)}</label>
+            <div class="inline-group">
+              <input id="companies-search" class="input" placeholder="${esc(searchLabel)}" />
+              <button class="btn" data-action="refresh">${esc(reloadLabel)}</button>
+              <button class="btn" data-action="csv">${esc(exportLabel)}</button>
+            </div>
+          </div>
         </div>
-        <div class="create-row">
-          <input id="companies-create-name" class="input" placeholder="${esc(t('legalName') ?? 'Legal name')}" />
-          <input id="companies-create-form" class="input" placeholder="${esc(t('legalForm') ?? 'Legal form')}" />
-          <button class="btn primary" data-action="create">${esc(t('create') ?? 'Create')}</button>
+        <div class="create-grid">
+          <div class="field">
+            <label class="label">${esc(nameLabel)}</label>
+            <input id="companies-create-name" class="input" placeholder="${esc(nameLabel)}" />
+          </div>
+          <div class="field">
+            <label class="label">${esc(formLabel)}</label>
+            <input id="companies-create-form" class="input" placeholder="${esc(formLabel)}" />
+          </div>
+          <div class="field actions">
+            <button class="btn primary" data-action="create">${esc(createLabel)}</button>
+          </div>
         </div>
       </div>
-      <div class="content">
-        <div class="list" data-role="list"></div>
-        <div class="detail" data-role="detail"></div>
+      <div class="content-grid">
+        <div class="card list-card" data-role="list"></div>
+        <div class="card detail-card" data-role="detail"></div>
       </div>
     </div>
   `;
 }
-
 function getDetailTemplate(company: CompanyDetail) {
   const officers = company.officers ?? [];
   const shareholders = company.shareholders ?? [];
