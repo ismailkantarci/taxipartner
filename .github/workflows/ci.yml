@@ -1,4 +1,5 @@
-name: CI
+name: Prepare env
+run:cp .env.ci .env
 on:
   push: { branches: ["*"] }
   pull_request: { branches: ["*"] }
