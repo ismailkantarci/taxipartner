@@ -1,5 +1,7 @@
 const API_BASE = (import.meta.env.VITE_IDENTITY_API ?? 'http://localhost:3000').replace(/\/+$/, '');
 
+type HeaderMap = Record<string, string>;
+
 import type { Paging, UserDetail, UserSummary } from './types';
 
 export type ListResponse = { ok: boolean; users: UserSummary[]; paging: Paging; error?: string };
@@ -28,10 +30,13 @@ function readToken(): string | null {
   return cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
 }
 
-function authz() {
+const authz = (): HeaderMap => {
   const token = readToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+  if (!token) {
+    return {};
+  }
+  return { Authorization: `Bearer ${token}` };
+};
 
 async function jsonFetch<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
   const response = await fetch(input, init);

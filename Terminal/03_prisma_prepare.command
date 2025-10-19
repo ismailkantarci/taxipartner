@@ -11,20 +11,26 @@ npx prisma generate --schema ../prisma/schema.prisma
 
 echo "[info] Seed çalıştırmak istiyor musun? (y/n)"
 read -r answer
-if [[ ${answer,,} == "y" ]]; then
-  cd "$PROJECT_ROOT"
-  npm run db:seed
-else
-  echo "[skip] Seed atlandı."
-fi
+case "$answer" in
+  [Yy])
+    cd "$PROJECT_ROOT"
+    npm run db:seed
+    ;;
+  *)
+    echo "[skip] Seed atlandı."
+    ;;
+esac
 
 echo "[info] Yeni migration var mı? (y/n)"
 read -r migrate
-if [[ ${migrate,,} == "y" ]]; then
-  cd "$PROJECT_ROOT"
-  npm run db:ensure
-else
-  echo "[skip] Migration atlandı."
-fi
+case "$migrate" in
+  [Yy])
+    cd "$PROJECT_ROOT"
+    npm run db:ensure
+    ;;
+  *)
+    echo "[skip] Migration atlandı."
+    ;;
+esac
 
 echo "[ok] Prisma hazırlığı tamamlandı."

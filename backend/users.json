@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "user-001",
+      "email": "nina.kraus@taxipartner.test",
+      "fullName": "Nina Kraus",
+      "role": "Operations Admin"
+    },
+    {
+      "id": "user-002",
+      "email": "marco.huber@taxipartner.test",
+      "fullName": "Marco Huber",
+      "role": "Compliance Officer"
+    },
+    {
+      "id": "user-003",
+      "email": "eva.leitner@taxipartner.test",
+      "fullName": "Eva Leitner",
+      "role": "Risk Analyst"
+    }
+  ]
+}

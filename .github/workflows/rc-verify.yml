@@ -1,0 +1,48 @@
+name: Release Candidate Verify
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ rc/* ]
+
+jobs:
+  rc-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies (root)
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Dependencies (identity)
+        run: npm --prefix identity ci --legacy-peer-deps
+
+      - name: Install Dependencies (frontend)
+        run: npm --prefix frontend ci --legacy-peer-deps
+
+      - name: RC Verification
+        run: npm run verify:rc
+
+      - name: Upload Lighthouse Report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-ci-report
+          path: docs/lighthouse/ci-report.json
+          if-no-files-found: ignore
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore

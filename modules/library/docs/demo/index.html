@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TAXIPartner Library Demo</title>
+    <link rel="stylesheet" href="demo.css" />
+  </head>
+  <body>
+    <main class="demo">
+      <header class="demo__header">
+        <h1>TAXIPartner Library Demo</h1>
+        <p>Paylaşımlı bileşenleri tek ekranda gör ve test et.</p>
+      </header>
+
+      <section class="card" id="phone-section">
+        <h2>Telefon Bileşeni</h2>
+        <p>
+          Uluslararası formatlama, otomatik ülke tespiti ve tek kaynaktan yönetilen
+          stil politikası.
+        </p>
+        <label class="card__label" for="demoPhone">Telefon</label>
+        <input id="demoPhone" type="tel" autocomplete="tel" placeholder="Numara girin" />
+
+        <div class="card__details" id="detailPanel">
+          <div><span>Formatlı Numara:</span> <code id="formatOut">—</code></div>
+          <div><span>Ülke:</span> <code id="countryOut">—</code></div>
+          <div><span>Geçerlilik:</span> <code id="validOut">—</code></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="phone-demo.js"></script>
+  </body>
+</html>

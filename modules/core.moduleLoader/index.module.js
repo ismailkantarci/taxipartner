@@ -52,7 +52,8 @@ export const ModuleLoader = {
 
       // Import module entry and initialize (path relative to this file)
       const moduleUrl = new URL(`../${name}/${manifest.entry}`, import.meta.url);
-      const { default: Mod } = await import(moduleUrl.href);
+      // Vite cannot statically analyze this runtime-computed path; suppress warning explicitly.
+      const { default: Mod } = await import(/* @vite-ignore */ moduleUrl.href);
       Mod?.init?.(container);
       this._current = { container, mod: Mod };
     } catch (err) {

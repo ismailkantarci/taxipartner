@@ -42,6 +42,7 @@ export function mountUsersPage(root: HTMLElement) {
   const listTitle = el('div', 'small', t('users'));
   const searchWrapper = el('div');
   searchWrapper.style.flex = '1';
+  searchWrapper.style.minWidth = '0';
   const searchInput = el('input', 'input') as HTMLInputElement;
   searchInput.placeholder = t('search');
   searchWrapper.append(searchInput);

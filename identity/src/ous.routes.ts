@@ -12,7 +12,11 @@ ousRouter.get(
   async (req, res) => {
     const tenantId =
       (req.headers["x-tenant-id"] as string | undefined) ||
-      (req.query.tenantId as string | undefined) ||
+      (typeof req.query?.tenantId === "string"
+        ? req.query.tenantId
+        : Array.isArray(req.query?.tenantId)
+        ? (req.query?.tenantId[0] as string | undefined)
+        : undefined) ||
       "";
     const rows = await prisma.oU.findMany({
       where: { tenantId },
@@ -54,7 +58,11 @@ ousRouter.put(
     const tenantId =
       (req.headers["x-tenant-id"] as string | undefined) ||
       req.body?.tenantId ||
-      (req.query.tenantId as string | undefined);
+      (typeof req.query?.tenantId === "string"
+        ? req.query.tenantId
+        : Array.isArray(req.query?.tenantId)
+        ? (req.query?.tenantId[0] as string | undefined)
+        : undefined);
     if (!tenantId) {
       res.status(400).json({ ok: false, error: "tenantId zorunludur" });
       return;

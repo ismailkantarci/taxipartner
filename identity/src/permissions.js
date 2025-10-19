@@ -43,6 +43,7 @@ export const PERM = {
 export const PERM_TENANT = {
     READ: 'tp.tenant.read',
     CREATE: 'tp.tenant.create',
+    UPDATE: 'tp.tenant.update',
     USER_ASSIGN: 'tp.tenant.user.assign'
 };
 export const PERM_OU = {
@@ -54,6 +55,36 @@ export const PERM_COMPANY = {
     CREATE: 'tp.company.create',
     UPDATE: 'tp.company.update',
     DELETE: 'tp.company.delete'
+};
+export const PERM_CORPORATE = {
+    READ: 'tp.corporate.read',
+    CREATE: 'tp.corporate.create'
+};
+export const PERM_ORGANIZATION = {
+    READ: 'tp.organization.read',
+    MANAGE: 'tp.organization.manage'
+};
+export const PERM_MANDATE = {
+    READ: 'tp.mandate.read',
+    MANAGE: 'tp.mandate.manage'
+};
+export const PERM_SHAREHOLDING = {
+    READ: 'tp.shareholding.read',
+    CREATE: 'tp.shareholding.create'
+};
+export const PERM_OFFICER = {
+    READ: 'tp.officer.read',
+    CREATE: 'tp.officer.create'
+};
+export const PERM_ASSIGNMENT = {
+    VEHICLE_READ: 'tp.assignment.vehicle.read',
+    VEHICLE_CREATE: 'tp.assignment.vehicle.create',
+    DRIVER_READ: 'tp.assignment.driver.read',
+    DRIVER_CREATE: 'tp.assignment.driver.create'
+};
+export const PERM_APPROVAL = {
+    READ: 'tp.approval.read',
+    CREATE: 'tp.approval.create'
 };
 export const TAG = {
     ANY_OPERATIONAL: [

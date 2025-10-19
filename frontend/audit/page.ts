@@ -14,6 +14,8 @@ type AuditRow = {
   userAgent?: string | null;
   ip?: string | null;
   metaJson?: string | null;
+  targetType?: string | null;
+  targetId?: string | null;
 };
 
 type ListResponse = {

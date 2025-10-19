@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+.cache
+coverage
+tmp
+playwright-report
+*.log

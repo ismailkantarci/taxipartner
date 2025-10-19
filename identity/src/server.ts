@@ -27,9 +27,13 @@ import { notificationsRouter } from './notifications.routes.js';
 import { tenantsRouter } from './tenants.routes.js';
 import { ousRouter } from './ous.routes.js';
 import { companiesRouter } from './companies.routes.js';
+import { vehiclesRouter } from './vehicles.routes.js';
+import importRouter from './importers/import.routes.js';
+import { corporateActionsRouter } from './corporateActions.routes.js';
 import { healthRouter } from './health.routes.js';
 import { langHint } from './lang.middleware.js';
 import { errorMiddleware } from './error.middleware.js';
+import { profileRouter } from './profile.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -71,6 +75,10 @@ app.use('/notifications', authGuard, notificationsRouter);
 app.use('/tenants', authGuard, tenantsRouter);
 app.use('/ous', authGuard, ousRouter);
 app.use('/companies', authGuard, companiesRouter);
+app.use('/vehicles', authGuard, vehiclesRouter);
+app.use('/admin', authGuard, importRouter);
+app.use('/corporate-actions', authGuard, corporateActionsRouter);
+app.use('/profile', authGuard, profileRouter);
 app.use('/health', healthRouter);
 
 async function mapDbUser(userId: string): Promise<User> {

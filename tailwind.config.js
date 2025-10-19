@@ -2,7 +2,12 @@
 export default {
   content: [
     './index.html',
-    './modules/**/*.{js,ts,html}'
+    './src/**/*.{js,ts,jsx,tsx}',
+    './modules/**/*.module.{js,ts}',
+    './frontend/index.html',
+    './frontend/src/**/*.{js,ts,jsx,tsx}',
+    './frontend/src/**/*.html',
+    './frontend/modules/**/*.module.{js,ts}'
   ],
   safelist: [
     // layout utilities used in modals that might not be present at build time
@@ -20,7 +25,22 @@ export default {
     'ring-2', 'ring-blue-400',
   ],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        brand: {
+          50: '#f4f8ff',
+          100: '#e6efff',
+          200: '#c7dbff',
+          300: '#9fbfff',
+          400: '#6e9bff',
+          500: '#3b75ff',
+          600: '#285be0',
+          700: '#2149b1',
+          800: '#1e3f90',
+          900: '#1b376f'
+        }
+      }
+    }
   },
   darkMode: 'class',
   plugins: []

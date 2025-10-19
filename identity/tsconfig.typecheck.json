@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "../.cache/types/identity",
+    "noEmit": false,
+    "noEmitOnError": true,
+    "skipLibCheck": true
+  }
+}

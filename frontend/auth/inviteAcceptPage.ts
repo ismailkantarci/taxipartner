@@ -1,4 +1,4 @@
-import { inviteAccept } from './api';
+import { inviteAccept, type InviteAcceptPayload, type InviteAcceptResponse } from './api';
 
 function getTokenFromHash() {
   const [, query] = location.hash.split('?');
@@ -21,16 +21,17 @@ export function mountInviteAccept(root: HTMLElement) {
   const get = (selector: string) => root.querySelector(selector) as HTMLElement;
   const output = get('#out') as HTMLPreElement;
 
-  async function accept(payload: Record<string, unknown>) {
-    const res = await inviteAccept({ token, ...payload });
+  async function accept(payload: Omit<InviteAcceptPayload, 'token'>): Promise<InviteAcceptResponse> {
+    const request: InviteAcceptPayload = { token, ...payload };
+    const res = await inviteAccept(request);
     output.textContent = JSON.stringify(res, null, 2);
     return res;
   }
 
-  (get('#btn') as HTMLButtonElement).onclick = async () => {
-    const password = (get('#pwd') as HTMLInputElement).value;
-    const wantTotp = (get('#totpSetup') as HTMLInputElement).checked;
-    const res = await accept({ password, totp: wantTotp ? { setup: true } : undefined });
+    (get('#btn') as HTMLButtonElement).onclick = async () => {
+      const password = (get('#pwd') as HTMLInputElement).value;
+      const wantTotp = (get('#totpSetup') as HTMLInputElement).checked;
+      const res = await accept({ password, totp: wantTotp ? { setup: true } : undefined });
     if (res.ok && res.qrDataUrl && wantTotp) {
       const qrHost = get('#qr');
       qrHost.innerHTML = `

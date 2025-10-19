@@ -3,18 +3,26 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run db:gen",
     "dev": "tsx src/server.ts",
-    "test": "tsx tests/roleGuard.spec.ts && tsx tests/permissionTemplates.spec.ts && node --test tests/auth.flow.test.ts",
+    "test": "tsx tests/roleGuard.spec.ts && tsx tests/permissionTemplates.spec.ts",
+    "test:auth": "tsx --test tests/auth.flow.test.js",
     "build": "tsc",
-    "db:gen": "prisma generate",
+    "db:gen": "prisma generate && node scripts/sync-prisma-client.mjs",
     "db:migrate": "prisma migrate dev --name init",
-    "db:seed": "tsx ../prisma/seed.ts"
+    "db:seed": "tsx ../prisma/seed.ts",
+    "import:registers": "tsx src/importers/runImport.ts"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
     "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^22.7.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.2",
+    "@types/qrcode": "^1.5.5",
     "esbuild": "^0.25.10",
     "prisma": "^5.20.0",
     "tsx": "^4.19.0",
@@ -31,11 +39,14 @@
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^6.9.15",
     "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.15",
     "otplib": "^12.0.1",
     "qrcode": "^1.5.3",
     "zod": "^3.23.8"
+  },
+  "prisma": {
+    "schema": "../prisma/schema.prisma"
   }
 }

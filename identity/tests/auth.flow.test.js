@@ -1,12 +1,14 @@
 process.env.NODE_ENV = 'test';
-process.env.DATABASE_URL = process.env.DATABASE_URL || 'file:./auth-test.db';
+const dbUrl = new URL('../../prisma/auth-test.db', import.meta.url);
+process.env.DATABASE_URL = dbUrl.href;
+process.env.DEV_BYPASS_AUTH = 'false';
 
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { authenticator } from 'otplib';
 
-const { prisma } = await import('../src/db.js');
-const { app } = await import('../src/server.js');
+const { prisma } = await import('../src/db.ts');
+const { app } = await import('../src/server.ts');
 
 let server;
 let baseUrl;

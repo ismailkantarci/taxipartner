@@ -1,4 +1,6 @@
 import { login } from './api';
+import { requireElement } from '../ui/dom';
+import { STORAGE_KEY_AUTH_TOKEN, STORAGE_KEY_TP_TOKEN_COOKIE } from '../ui/storageKeys';
 
 export function mountLogin(root: HTMLElement) {
   root.innerHTML = `
@@ -10,14 +12,27 @@ export function mountLogin(root: HTMLElement) {
       <pre id="out" style="margin-top:12px;padding:8px;background:#f8fafc;border-radius:6px;min-height:60px"></pre>
     </section>
   `;
-  const get = (selector: string) => root.querySelector(selector) as HTMLInputElement | HTMLPreElement | HTMLButtonElement;
-  const output = get('#out') as HTMLPreElement;
-  (get('#btn') as HTMLButtonElement).onclick = async () => {
-    const res = await login(get('#email').value, get('#password').value);
+  const emailInput = requireElement<HTMLInputElement>(root, '#email');
+  const passwordInput = requireElement<HTMLInputElement>(root, '#password');
+  const submitBtn = requireElement<HTMLButtonElement>(root, '#btn');
+  const output = requireElement<HTMLPreElement>(root, '#out');
+  submitBtn.onclick = async () => {
+    const res = await login(emailInput.value, passwordInput.value);
     output.textContent = JSON.stringify(res, null, 2);
     if (res.ok && res.token) {
-      localStorage.setItem('token', res.token);
-      document.cookie = `tp_token=${encodeURIComponent(res.token)}; path=/; SameSite=Lax`;
+      localStorage.setItem(STORAGE_KEY_AUTH_TOKEN, res.token);
+      const cookieParts = [
+        `${STORAGE_KEY_TP_TOKEN_COOKIE}=${encodeURIComponent(res.token)}`,
+        'path=/',
+        'SameSite=Lax'
+      ];
+      if (location.protocol === 'https:') {
+        cookieParts.push('Secure');
+      }
+      if (location.hostname.endsWith('.app.github.dev')) {
+        cookieParts.push('domain=.app.github.dev');
+      }
+      document.cookie = cookieParts.join('; ');
       location.hash = '#/users';
     } else if (res.ok && res.mfa_required) {
       output.textContent = JSON.stringify({ info: 'MFA required', userId: res.userId }, null, 2);

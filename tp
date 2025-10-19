@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+print_usage() {
+  cat <<'EOF'
+tp <komut> [opsiyonlar]
+
+Komutlar:
+  start            Geliştirme servislerini (npm run codespaces:start) başlatır. (Varsayılan)
+  setup            İlk kurulum için Codespaces/01_bootstrap.sh çalıştırır.
+  lint             npm run lint
+  typecheck        npm run typecheck
+  test             npm run test
+  rc-build         infra/Dockerfile ile taxipartner-admin imajı üretir.
+  docker-up        RC imajını 8080 portunda ayağa kaldırır.
+  docker-stop      docker-up ile başlatılan konteyneri durdurur.
+  help             Bu mesajı gösterir.
+
+Çevre değişkenleri:
+  TP_DOCKER_TAG          (varsayılan: taxipartner-admin:rc1)
+  TP_DOCKER_CONTAINER    (varsayılan: tp-admin-rc1)
+  TP_DOCKER_PORT         (varsayılan: 8080)
+  TP_DOCKER_BASE_URL     (varsayılan: https://api.staging.taxipartner.at)
+  TP_DOCKER_TENANT_HEADER (varsayılan: x-tenant-id)
+  TP_DOCKER_ENABLE_WRITE (varsayılan: false)
+  TP_DOCKER_SENTRY_DSN   (varsayılan: boş)
+  TP_DOCKER_LOCALE       (varsayılan: de-AT)
+EOF
+}
+
+bootstrap_env() {
+  bash "$ROOT_DIR/scripts/bootstrap_env.sh"
+}
+
+COMMAND="start"
+if [ $# -gt 0 ]; then
+  COMMAND="$1"
+  shift
+fi
+
+case "$COMMAND" in
+  start|start-dev)
+    bootstrap_env
+    bash "$ROOT_DIR/Codespaces/10_start_all.sh" "$@"
+    ;;
+  setup)
+    bootstrap_env
+    bash "$ROOT_DIR/Codespaces/01_bootstrap.sh" "$@"
+    ;;
+  lint)
+    bootstrap_env
+    npm --prefix "$ROOT_DIR" run lint "$@"
+    ;;
+  typecheck)
+    bootstrap_env
+    npm --prefix "$ROOT_DIR" run typecheck "$@"
+    ;;
+  test)
+    bootstrap_env
+    npm --prefix "$ROOT_DIR" run test "$@"
+    ;;
+  rc-build)
+    bootstrap_env
+    TAG="${TP_DOCKER_TAG:-taxipartner-admin:rc1}"
+    docker build -t "$TAG" -f "$ROOT_DIR/infra/Dockerfile" "$ROOT_DIR"
+    ;;
+  docker-up)
+    bootstrap_env
+    TAG="${TP_DOCKER_TAG:-taxipartner-admin:rc1}"
+    CONTAINER="${TP_DOCKER_CONTAINER:-tp-admin-rc1}"
+    PORT="${TP_DOCKER_PORT:-8080}"
+    BASE_URL="${TP_DOCKER_BASE_URL:-https://api.staging.taxipartner.at}"
+    TENANT_HEADER="${TP_DOCKER_TENANT_HEADER:-x-tenant-id}"
+    ENABLE_WRITE="${TP_DOCKER_ENABLE_WRITE:-false}"
+    SENTRY_DSN="${TP_DOCKER_SENTRY_DSN:-}"
+    LOCALE="${TP_DOCKER_LOCALE:-de-AT}"
+
+    if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
+      echo "[info] $CONTAINER mevcut, durduruluyor..."
+      docker stop "$CONTAINER" >/dev/null || true
+    fi
+
+    docker run -d --rm \
+      -p "${PORT}:80" \
+      --name "$CONTAINER" \
+      -e VITE_BASE_URL="$BASE_URL" \
+      -e VITE_TENANT_HEADER="$TENANT_HEADER" \
+      -e VITE_ENABLE_HTTP_WRITE="$ENABLE_WRITE" \
+      -e VITE_SENTRY_DSN="$SENTRY_DSN" \
+      -e VITE_LOCALE_DEFAULT="$LOCALE" \
+      "$TAG"
+    ;;
+  docker-stop)
+    CONTAINER="${TP_DOCKER_CONTAINER:-tp-admin-rc1}"
+    if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
+      docker stop "$CONTAINER"
+    else
+      echo "[info] $CONTAINER çalışmıyor."
+    fi
+    ;;
+  lighthouse)
+    TARGET="http://127.0.0.1:${TP_DOCKER_PORT:-8080}"
+    if ! curl -s --max-time 2 "$TARGET/healthz" >/dev/null 2>&1; then
+      echo "[error] $TARGET adresine bağlanılamadı. Önce \`tp docker-up\` komutuyla RC konteynerini başlat."
+      exit 1
+    fi
+    REPORT_FLAG="${TP_LIGHTHOUSE_REPORT:-0}"
+    if [[ "$REPORT_FLAG" == "1" ]]; then
+      npm run lighthouse:report
+    else
+      npm run lighthouse
+    fi
+    ;;
+  help|-h|--help)
+    print_usage
+    ;;
+  *)
+    echo "[error] Bilinmeyen komut: $COMMAND" >&2
+    print_usage
+    exit 1
+    ;;
+esac

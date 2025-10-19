@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/lib/settings/**/*",
+    "src/lib/i18n/**/*",
+    "src/lib/env/**/*",
+    "src/lib/obs/**/*",
+    "src/lib/query/**/*",
+    "src/lib/repo/**/*",
+    "src/features/audit/**/*",
+    "src/features/compliance/**/*",
+    "src/features/risk/**/*",
+    "src/features/program/goals/**/*",
+    "src/components/AuditDetailModal.tsx",
+    "src/layout/AdminLayout.tsx",
+    "src/pages/**/*",
+    "frontend/**/*.ts",
+    "modules/library/tokens/index.d.ts"
+  ]
+}

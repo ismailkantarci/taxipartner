@@ -4,6 +4,10 @@ import { prisma } from './db.js';
 export type RepoUser = {
   id: string;
   email?: string | null;
+  fullName?: string | null;
+  phone?: string | null;
+  preferredLanguage?: string | null;
+  preferredTheme?: string | null;
   roles: string[];
   claims?: unknown;
   mfaEnabled?: boolean;
@@ -28,12 +32,21 @@ type PrismaUserWithRelations = Prisma.UserGetPayload<{
     roles: { include: { role: true } };
     sessions: true;
   };
-}>;
+}> & {
+  fullName?: string | null;
+  phone?: string | null;
+  preferredLanguage?: string | null;
+  preferredTheme?: string | null;
+};
 
 function mapDbUser(user: PrismaUserWithRelations): RepoUser {
   return {
     id: user.id,
     email: user.email,
+    fullName: user.fullName ?? null,
+    phone: user.phone ?? null,
+    preferredLanguage: user.preferredLanguage ?? null,
+    preferredTheme: user.preferredTheme ?? null,
     roles: user.roles.map((entry) => entry.role.name),
     claims: safeParse(user.claimsJson ?? undefined),
     mfaEnabled: user.mfaEnabled ?? undefined,
@@ -49,8 +62,8 @@ export async function repoListUsers(q?: string, skip = 0, take = 50): Promise<Re
       where: q
         ? {
             OR: [
-              { email: { contains: q, mode: 'insensitive' } },
-              { id: { contains: q, mode: 'insensitive' } }
+              { email: { contains: q } },
+              { id: { contains: q } }
             ]
           }
         : undefined,
@@ -81,8 +94,8 @@ export async function repoCountUsers(q?: string): Promise<number> {
       where: q
         ? {
             OR: [
-              { email: { contains: q, mode: 'insensitive' } },
-              { id: { contains: q, mode: 'insensitive' } }
+              { email: { contains: q } },
+              { id: { contains: q } }
             ]
           }
         : undefined
@@ -147,13 +160,32 @@ export async function repoCreateUser(email?: string): Promise<RepoUser> {
 export async function repoSaveUser(user: RepoUser): Promise<RepoUser> {
   try {
     const updates: Promise<unknown>[] = [];
-    const userData: { claimsJson?: string | null; mfaEnabled?: boolean } = {};
+    const userData: {
+      claimsJson?: string | null;
+      mfaEnabled?: boolean;
+      fullName?: string | null;
+      phone?: string | null;
+      preferredLanguage?: string | null;
+      preferredTheme?: string | null;
+    } = {};
 
     if (user.claims !== undefined) {
       userData.claimsJson = user.claims ? JSON.stringify(user.claims) : null;
     }
     if (user.mfaEnabled !== undefined) {
       userData.mfaEnabled = user.mfaEnabled;
+    }
+    if (user.fullName !== undefined) {
+      userData.fullName = user.fullName ?? null;
+    }
+    if (user.phone !== undefined) {
+      userData.phone = user.phone ?? null;
+    }
+    if (user.preferredLanguage !== undefined) {
+      userData.preferredLanguage = user.preferredLanguage ?? null;
+    }
+    if (user.preferredTheme !== undefined) {
+      userData.preferredTheme = user.preferredTheme ?? null;
     }
 
     if (Object.keys(userData).length > 0) {

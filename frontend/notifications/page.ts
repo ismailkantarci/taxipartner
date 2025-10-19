@@ -1,28 +1,14 @@
 import './page.css';
-import { listNotifications, markNotificationRead } from './api';
+import {
+  listNotifications,
+  markNotificationRead,
+  type NotificationItem,
+  type NotificationsResponse,
+  type NotificationMutationResponse
+} from './api';
 import { t } from '../i18n/index';
 import { toastOk, toastErr } from '../ui/toast';
 import { showError } from '../ui/error';
-
-type NotificationItem = {
-  id: string;
-  channel: string;
-  subject?: string | null;
-  body?: string | null;
-  createdAt: string;
-  isRead: boolean;
-};
-
-type NotificationsResponse = {
-  ok: boolean;
-  items?: NotificationItem[];
-  error?: string;
-};
-
-type MutationResponse = {
-  ok: boolean;
-  error?: string;
-};
 
 export function mountNotificationsPage(root: HTMLElement) {
   root.innerHTML = '';
@@ -37,7 +23,7 @@ export function mountNotificationsPage(root: HTMLElement) {
   async function load() {
     card.innerHTML = `<div class="header">${t('notifications')}<span class="small">${t('loading')}</span></div>`;
     try {
-      const res: NotificationsResponse = await listNotifications({});
+      const res = await listNotifications({});
       if (!res.ok) {
         card.innerHTML = `<div class="header">${t('notifications')}</div><div class="empty">${res.error || t('notificationsLoadFailed')}</div>`;
         toastErr(res.error || t('notificationsLoadFailed'));
@@ -83,7 +69,7 @@ export function mountNotificationsPage(root: HTMLElement) {
         button.addEventListener('click', async () => {
           button.disabled = true;
           try {
-            const res: MutationResponse = await markNotificationRead(item.id);
+            const res: NotificationMutationResponse = await markNotificationRead(item.id);
             if (!res.ok) {
               const message = res.error || t('errorGeneric');
               showError(message);

@@ -23,7 +23,7 @@ function buildAuthorizeUrl(authority: string, params: Record<string, string>) {
   return url.toString();
 }
 
-ssoRouter.get('/login', (_req, res) => {
+ssoRouter.get('/login', (req, res) => {
   try {
     const provider = String(req.query.provider || PROVIDER_KEY);
     if (provider !== PROVIDER_KEY) {

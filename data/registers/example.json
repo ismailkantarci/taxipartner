@@ -1,0 +1,29 @@
+{
+  "tenants": [
+    {
+      "tenantId": "FN100001",
+      "legalName": "TestTaxi KG",
+      "legalForm": "KG",
+      "seatAddress": "1010 Wien, Testgasse 1",
+      "companies": [
+        {
+          "companyId": "GISA99999",
+          "legalName": "TestTaxi KG",
+          "address": "1010 Wien, Testgasse 1",
+          "status": "Active",
+          "permits": [
+            {
+              "permit_type": "Personenbeförderungsgewerbe mit Pkw - Taxi",
+              "issuing_authority": "MBA 1/8",
+              "reference_no": "99999",
+              "permit_registered_on": "2024-01-10",
+              "effective_from": "2024-01-15",
+              "capacity_pkw": 1,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

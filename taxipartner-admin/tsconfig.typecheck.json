@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "../.cache/types/taxipartner-admin",
+    "noEmit": false,
+    "noEmitOnError": true,
+    "skipLibCheck": true
+  }
+}

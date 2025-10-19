@@ -6,6 +6,7 @@ release-pack/
 dist/
 node_modules/
 *.log
+output.css
 
 # Build artefacts & local DB snapshots
 /dist/
@@ -13,3 +14,20 @@ node_modules/
 /release-pack/
 /identity/dev.db
 /prisma/dev.db
+
+*storybook.log
+modules/library/dist/
+apps/design-system/storybook-static/
+
+.cache/
+coverage/
+*.tsbuildinfo
+docs/lighthouse/*.json
+playwright-report/
+
+.env
+.env.local
+.env.*.local
+identity/.env
+.envrc
+.direnv/

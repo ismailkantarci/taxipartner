@@ -1,31 +1,18 @@
 import './page.css';
-import { listTasks, createTask, updateTask, deleteTask, runTask } from './api';
+import {
+  listTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+  runTask,
+  type TaskItem,
+  type TaskMutationResponse,
+  type TaskMutationInput
+} from './api';
 import { t } from '../i18n/index';
 import { toastOk, toastErr } from '../ui/toast';
-
-type TaskItem = {
-  id: string;
-  name: string;
-  description?: string | null;
-  cron: string;
-  isEnabled: boolean;
-  channels?: string | null;
-  payload?: string | null;
-  lastRunAt?: string | null;
-  createdAt?: string;
-};
-
-type TasksResponse = {
-  ok: boolean;
-  items?: TaskItem[];
-  error?: string;
-};
-
-type MutationResponse = {
-  ok: boolean;
-  task?: TaskItem;
-  error?: string;
-};
+import type { JsonObject, JsonValue } from '../types/json';
+import { requireElement } from '../ui/dom';
 
 export async function mountTasksPage(root: HTMLElement) {
   root.innerHTML = '';
@@ -61,8 +48,8 @@ export async function mountTasksPage(root: HTMLElement) {
     filter: ''
   };
 
-  const searchInput = toolbar.querySelector('#tasks-search') as HTMLInputElement;
-  const createButton = toolbar.querySelector('#tasks-create') as HTMLButtonElement;
+  const searchInput = requireElement<HTMLInputElement>(toolbar, '#tasks-search');
+  const createButton = requireElement<HTMLButtonElement>(toolbar, '#tasks-create');
 
   searchInput.addEventListener('input', () => {
     state.filter = searchInput.value.trim().toLowerCase();
@@ -71,14 +58,15 @@ export async function mountTasksPage(root: HTMLElement) {
 
   createButton.addEventListener('click', async () => {
     try {
-      const res: MutationResponse = await createTask({
+      const payload: TaskMutationInput = {
         name: t('defaultTaskName'),
         description: '',
         cron: '*/5 * * * *',
         channels: { inapp: true },
         payload: { subject: t('defaultSubject'), body: t('defaultBody') },
         isEnabled: true
-      });
+      };
+      const res: TaskMutationResponse = await createTask(payload);
       if (!res.ok) {
         toastErr(res.error || t('errorGeneric'));
         return;
@@ -95,7 +83,7 @@ export async function mountTasksPage(root: HTMLElement) {
   async function loadTasks(selectId: string | null) {
     try {
       listContainer.innerHTML = `<div class="empty-state">${t('loading')}</div>`;
-      const res: TasksResponse = await listTasks();
+      const res = await listTasks();
       if (!res.ok) {
         listContainer.innerHTML = `<div class="empty-state">${res.error || t('tasksLoadFailed')}</div>`;
         toastErr(res.error || t('tasksLoadFailed'));
@@ -150,7 +138,7 @@ export async function mountTasksPage(root: HTMLElement) {
         <button class="btn primary" id="tasks-create-inline">${t('createTask')}</button>
       </div>
     `;
-    const inlineCreate = detailCard.querySelector('#tasks-create-inline') as HTMLButtonElement;
+    const inlineCreate = requireElement<HTMLButtonElement>(detailCard, '#tasks-create-inline');
     inlineCreate.addEventListener('click', () => createButton.click());
   }
 
@@ -204,20 +192,20 @@ export async function mountTasksPage(root: HTMLElement) {
 
     detailCard.append(header, section);
 
-    const nameInput = section.querySelector('#task-name') as HTMLInputElement;
-    const descriptionInput = section.querySelector('#task-description') as HTMLInputElement;
-    const cronInput = section.querySelector('#task-cron') as HTMLInputElement;
-    const channelsInput = section.querySelector('#task-channels') as HTMLTextAreaElement;
-    const payloadInput = section.querySelector('#task-payload') as HTMLTextAreaElement;
-    const enabledSelect = section.querySelector('#task-enabled') as HTMLSelectElement;
+    const nameInput = requireElement<HTMLInputElement>(section, '#task-name');
+    const descriptionInput = requireElement<HTMLInputElement>(section, '#task-description');
+    const cronInput = requireElement<HTMLInputElement>(section, '#task-cron');
+    const channelsInput = requireElement<HTMLTextAreaElement>(section, '#task-channels');
+    const payloadInput = requireElement<HTMLTextAreaElement>(section, '#task-payload');
+    const enabledSelect = requireElement<HTMLSelectElement>(section, '#task-enabled');
 
-    const runButton = header.querySelector('#task-run') as HTMLButtonElement;
-    const saveButton = header.querySelector('#task-save') as HTMLButtonElement;
-    const deleteButton = header.querySelector('#task-delete') as HTMLButtonElement;
+    const runButton = requireElement<HTMLButtonElement>(header, '#task-run');
+    const saveButton = requireElement<HTMLButtonElement>(header, '#task-save');
+    const deleteButton = requireElement<HTMLButtonElement>(header, '#task-delete');
 
     runButton.addEventListener('click', async () => {
       try {
-        const res = await runTask(task.id);
+        const res: TaskMutationResponse = await runTask(task.id);
         if (!res.ok) {
           toastErr(res.error || t('taskRunFailed'));
           return;
@@ -235,7 +223,7 @@ export async function mountTasksPage(root: HTMLElement) {
         const payloadJson = parseJson(payloadInput.value, t('payload'));
         if (payloadJson === undefined) return;
 
-        const body = {
+        const body: TaskMutationInput = {
           name: nameInput.value.trim(),
           description: descriptionInput.value.trim(),
           cron: cronInput.value.trim(),
@@ -243,7 +231,7 @@ export async function mountTasksPage(root: HTMLElement) {
           payload: payloadJson,
           isEnabled: enabledSelect.value === 'true'
         };
-        const res: MutationResponse = await updateTask(task.id, body);
+        const res: TaskMutationResponse = await updateTask(task.id, body);
         if (!res.ok) {
           toastErr(res.error || t('errorGeneric'));
           return;
@@ -258,7 +246,7 @@ export async function mountTasksPage(root: HTMLElement) {
     deleteButton.addEventListener('click', async () => {
       if (!window.confirm(t('confirmDeleteTask'))) return;
       try {
-        const res = await deleteTask(task.id);
+        const res: TaskMutationResponse = await deleteTask(task.id);
         if (!res.ok) {
           toastErr(res.error || t('errorGeneric'));
           return;
@@ -271,11 +259,15 @@ export async function mountTasksPage(root: HTMLElement) {
     });
   }
 
-  function parseJson(source: string, label: string): unknown | undefined {
+  function parseJson(source: string, label: string): JsonObject | undefined {
     const trimmed = source.trim();
     if (!trimmed) return {};
     try {
-      return JSON.parse(trimmed);
+      const parsed = JSON.parse(trimmed) as JsonValue;
+      if (!isJsonObject(parsed)) {
+        throw new Error('not an object');
+      }
+      return parsed;
     } catch (error) {
       toastErr(`${label}: ${t('invalidJson')}`);
       return undefined;
@@ -324,4 +316,8 @@ function formatJson(source: string | null | undefined, fallback: string) {
 function messageFromError(error: unknown) {
   if (error instanceof Error) return error.message;
   return t('errorGeneric');
+}
+
+function isJsonObject(value: JsonValue): value is JsonObject {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

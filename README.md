@@ -2,7 +2,9 @@
 
 ## Scripts
 - `npm i` – install deps
-- `npm run dev` – vite dev server
+- `npm run dev` – Vite dev server + Tailwind watcher (tek komut)
+- `npm run dev:vite` – yalnız Vite dev server
+- `npm run dev:css` – Tailwind watcher (`output.css`)
 - `npm run build` – vite build + tailwind css build
 - `npm test` – vitest unit tests
 - `npm run sandbox` – docs/style-sandbox.html için hafif statik sunucu (QA/görsel inceleme)
@@ -26,7 +28,7 @@ Yerel geliştirme sırasında ön yüzü görüntülemek için aşağıdaki adı
 
 1. `cp .env.example .env` komutuyla temel ortam değişkenlerini hazırlayın (içerik UTF-8 uyumludur).
 2. `npm install` çalıştırarak bağımlılıkları kurun.
-3. `npm run dev` komutunu başlatın; Vite varsayılan olarak `http://localhost:5173` adresinde hizmet verir.
+3. `npm run dev` komutunu başlatın; Vite varsayılan olarak `http://localhost:5173` adresinde hizmet verir ve Tailwind watcher otomatik olarak `output.css` üretir.
 4. Tarayıcıda `http://localhost:5173/#/` adresine giderek varsayılan Dashboard/Frontpage ekranını açın. Hash tabanlı router otomatik olarak `modules/core.router/index.module.js` üzerinden `Dashboard` modülünü yükler.
 
 > Not: Prod derlemesi için `npm run build` ve ardından `npm run preview` komutlarıyla statik çıktıyı (`dist/`) test edebilir, aynı URL üzerinden erişebilirsiniz. Çok dilli içerik modüller tarafından yönetilir; uygulama Almanca (`de-AT`) varsayılanıyla başlar, uygun tenant ve sürüm mantığı `core.app` içinde yüklenir.
@@ -41,17 +43,16 @@ Yerel depo GitHub/GitLab gibi bir uzak sunucuya bağlı olmadığı için Git ot
 Bu adımlar Tailwind + modüler init yapısı, çok dillilik (de-AT/tr-TR/en-GB) ve multi-tenant sürümleme ile uyumlu kalır; yalnızca Git inceleme sürecini şeffaflaştırır.
 
 ## Easyname (FTP) Üzerinden Yayınlama
-`www.taxipartner.at` şu anda Easyname tarafında barındırıldığı ve FTP erişimi bulunduğu için, Git deposunu kaybetmeden canlıya geçişi aşağıdaki süreçle yönetebilirsiniz:
+`www.taxipartner.at` Easyname üzerinde barındırılıyor; statik build’i (`dist/`) FTP ile buraya yükleyerek Git deposunu ana kaynak olarak koruyabilirsiniz. Detaylı adımlar `docs/deploy/easyname.md` içinde, özet akış aşağıda:
 
-1. **Git deposu ana kaynak olarak kalır** – Tüm geliştirmeler `git` üzerinde (`/workspace/taxipartner` benzeri bir çalışma kopyasında) yapılır. Easyname FTP alanına yalnızca derlenmiş çıktı gönderilir; depo dosyalarını doğrudan FTP'ye taşımayın.
-2. **Derleme** – Üretim paketini yerelde veya CI'da hazırlamak için `npm run build` çalıştırın. Çıktı UTF-8 uyumlu olarak `dist/` dizinine düşer ve Tailwind + modüler `init(target)` mimarisini korur.
-3. **Çok dillilik ve tenant kontrolü** – `dist/` içindeki `index.html`, `locales/` ve `modules/` içeriği `de-AT`, `tr-TR`, `en-GB` varyantlarını ve tenant bazlı yüklemeyi sürdürür. Easyname ortamına aktarırken bu dizin yapısını aynen koruyun.
-4. **FTP senkronizasyonu** – Easyname'in sağladığı FTP/SFTP hesabına bağlanın. Var olan WIX içeriği korunacaksa, TAXIPartner yönetim arayüzü için ayrı bir alt klasör (`/admin/` gibi) oluşturun. Tam geçişte DNS `admin.taxipartner.at` Easyname barındırmasına yönlendirildiğinde `dist/` içeriğini kök dizine (veya belirlenen alt dizine) yükleyin.
-5. **Sürümleme ve yedek** – Her yayın öncesi Git'te tag/commit oluşturun. FTP'ye yüklenen dosyaların bir kopyasını `release-pack/` veya CI artefaktı olarak saklayın ki gerekirse önceki sürüme dönülebilsin.
-6. **Otomasyon seçeneği** – Manuel FTP yerine `lftp`, `rsync` (SFTP) ya da Easyname API destekliyorsa GitHub Actions/GitLab CI üzerinden otomatik dağıtım betiği kullanın. Bu betik `npm run build` sonrasında yalnızca `dist/` içeriğini aktarır; multi-tenant konfigürasyonlar için `app.config.json` ve `.env.production` dosyalarını aynı klasöre yerleştirmeyi unutmayın.
-7. **Kimlik doğrulama ve backend** – Easyname yalnızca statik dosyaları sunuyorsa, kimlik sağlayıcısı (`/auth` endpoint'leri) ve API başka bir yerde (ör. mevcut backend hostunuzda) çalışmalıdır. `app.config.json` içindeki `identity.baseUrl` ve `api.baseUrl` değerlerinin canlı ortama uygun olduğundan emin olun.
+1. **Kaynak git’te** – Tüm geliştirme Git üzerinde kalır. Easyname’e yalnızca derlenmiş çıktıyı gönderin.
+2. **Derleme** – `npm run build` komutu Vite + Tailwind çıktısını `dist/` dizinine üretir (`index.html`, `output.css`, `assets/`).
+3. **Konfigürasyon** – `app.config.json` ve gerekiyorsa `.env.production` dosyalarındaki API/kimlik URL’lerini canlı backend’e göre ayarlayın.
+4. **FTP yükleme** – Easyname FTP/SFTP bilgileriyle bağlanıp `dist/` içeriğini hedef klasöre atın (tam geçiş için kök dizin, Wix ile birlikteyse ör. `/admin/` altı). Otomasyon istiyorsanız `lftp` / `rsync` betiği hazırlayın.
+5. **Sürümleme & yedek** – Her dağıtımda Git tag/commit oluşturup yüklediğiniz dosyaların kopyasını saklayın ki rollback kolay olsun.
+6. **Backend entegrasyonu** – Easyname yalnızca statik dosya servis eder; kimlik sağlayıcısı ve API mevcut sunucunuzda kalmalıdır. CORS/redirect ayarlarının Easyname hostu tanıdığından emin olun.
 
-Bu yaklaşım sayesinde Git geçmişi, kod inceleme süreçleri ve çok dilli/multi-tenant mimari korunur; Easyname sadece statik yayın katmanı olur.
+> Alternatif olarak tam otomasyon istediğinizde Netlify/Vercel gibi Git tabanlı hostinglere geçilebilir; şu anda ana yol Easyname FTP’dir.
 
 For Release Management UX changes and usage tips see:
 - `docs/ReleaseManagement-UX.md`

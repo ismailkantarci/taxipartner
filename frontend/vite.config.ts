@@ -7,6 +7,7 @@ export default defineConfig({
     port: 5174
   },
   build: {
+    target: 'es2022',
     outDir: path.resolve(__dirname, 'dist'),
     emptyOutDir: true
   }

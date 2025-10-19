@@ -1,3 +1,15 @@
 {
-    "chatgpt.openOnStartup": true
+  "chatgpt.openOnStartup": true,
+  "files.exclude": {
+    "**/.env": true,
+    "**/identity/.env": true
+  },
+  "terminal.integrated.env.linux": {
+    "OPENAI_API_KEY": "${env:OPENAI_API_KEY}",
+    "OPENAI_MODEL": "${env:OPENAI_MODEL}",
+    "OPENAI_CODEX_MODEL": "${env:OPENAI_CODEX_MODEL}",
+    "OPENAI_ORG": "${env:OPENAI_ORG}",
+    "OPENAI_PROJECT": "${env:OPENAI_PROJECT}"
+  },
+  "chatgpt.commentCodeLensEnabled": true
 }

@@ -8,21 +8,69 @@ async function main() {
     create: { email, password: "dev-placeholder", mfaEnabled: false }
   });
 
-  const tcode = process.env.SEED_TENANT_CODE || "tp-demo";
+  const tenantId = process.env.SEED_TENANT_ID || "FN-DEMO-0001";
   const tenant = await prisma.tenant.upsert({
-    where: { code: tcode },
+    where: { tenantId },
     update: {},
-    create: { code: tcode, name: "TAXIPartner Demo" }
+    create: {
+      tenantId,
+      legalName: "TAXIPartner Demo GmbH",
+      legalForm: "GmbH",
+      seatAddress: "Demo Straße 1, 1010 Wien"
+    }
+  });
+
+  await prisma.$transaction(async (tx) => {
+    const currentIdentity = await tx.tenantIdentity.findFirst({
+      where: { tenantId: tenant.tenantId, currentFlag: true }
+    });
+    const now = new Date();
+    now.setUTCHours(0, 0, 0, 0);
+    const baseIdentity = {
+      legalName: tenant.legalName,
+      legalForm: tenant.legalForm,
+      seatAddress: tenant.seatAddress
+    };
+    if (!currentIdentity) {
+      await tx.tenantIdentity.create({
+        data: {
+          tenantId: tenant.tenantId,
+          currentFlag: true,
+          ...baseIdentity,
+          validFrom: now
+        }
+      });
+      return;
+    }
+    const differs =
+      currentIdentity.legalName !== baseIdentity.legalName ||
+      currentIdentity.legalForm !== baseIdentity.legalForm ||
+      currentIdentity.seatAddress !== baseIdentity.seatAddress;
+    if (!differs) {
+      return;
+    }
+    await tx.tenantIdentity.update({
+      where: { id: currentIdentity.id },
+      data: { currentFlag: false, validTo: now }
+    });
+    await tx.tenantIdentity.create({
+      data: {
+        tenantId: tenant.tenantId,
+        currentFlag: true,
+        ...baseIdentity,
+        validFrom: now
+      }
+    });
   });
 
   await prisma.tenantUser.upsert({
-    where: { tenantId_userId: { tenantId: tenant.id, userId: user.id } },
+    where: { tenantId_userId: { tenantId: tenant.tenantId, userId: user.id } },
     update: { role: "Admin" },
-    create: { tenantId: tenant.id, userId: user.id, role: "Admin" }
+    create: { tenantId: tenant.tenantId, userId: user.id, role: "Admin" }
   });
 
-  console.log("[SEED] user:", user.email, "tenant:", tenant.code);
-  console.log("[SEED] OK – use tenantId:", tenant.id, "in x-tenant-id header");
+  console.log("[SEED] user:", user.email, "tenant:", tenant.tenantId);
+  console.log("[SEED] OK – use tenantId:", tenant.tenantId, "in x-tenant-id header");
 }
 
 main()

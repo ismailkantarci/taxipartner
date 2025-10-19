@@ -53,7 +53,11 @@ export async function authGuard(req: Request, res: Response, next: NextFunction)
         include: { roles: { include: { role: true } } }
       });
       if (!user) {
-        user = await ensureDevUser();
+        user = await ensureDevUser() ?? null;
+      }
+      if (!user) {
+        res.status(500).json({ ok: false, error: 'Geliştirici baypas kullanıcısı oluşturulamadı.' });
+        return;
       }
       (req as any).user = {
         id: user.id,

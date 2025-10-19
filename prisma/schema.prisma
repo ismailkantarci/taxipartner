@@ -143,11 +143,23 @@ model Tenant {
   legalForm   String?  @map("legal_form")
   seatAddress String?  @map("seat_address")
   status      String   @default("Active")
+  validTo     DateTime? @map("valid_to")
   createdAt   DateTime @default(now()) @map("created_at")
   users       TenantUser[]
   ous         OU[]
   companies   Company[]
   vehicles    Vehicle[]
+  identityHistory TenantIdentity[]
+  targetCorporateActions CorporateAction[]
+  identifiers TenantIdentifier[]
+  shareholdings Shareholding[]
+  officers    Officer[]
+  vehicleAssignments VehicleAssignment[]
+  driverAssignments DriverAssignment[]
+  approvals   ApprovalRequest[]
+  statusEvents EntityStatusEvent[]
+  organizations Organization[]
+  mandates   Mandate[]
 
   @@map("tenants")
 }
@@ -177,12 +189,39 @@ model OU {
   @@map("ous")
 }
 
+model Organization {
+  id           String    @id @default(uuid()) @map("org_id")
+  tenantId     String    @map("tenant_id")
+  name         String
+  orgType      String?   @map("org_type")
+  status       String    @default("Active")
+  description  String?   @map("description")
+  parentId     String?   @map("parent_id")
+  companyId    String?   @map("company_id")
+  validFrom    DateTime? @map("valid_from")
+  validTo      DateTime? @map("valid_to")
+  metaJson     String?   @map("meta_json")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  tenant       Tenant    @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  parent       Organization? @relation("OrganizationHierarchy", fields: [parentId], references: [id])
+  children     Organization[] @relation("OrganizationHierarchy")
+  mandates     Mandate[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([parentId])
+  @@index([companyId])
+  @@map("organizations")
+}
+
 model Company {
   companyId   String        @id @map("company_id")
   tenantId    String        @map("tenant_id")
   legalName   String        @map("legal_name")
   address     String
   status      String        @default("Active")
+  validTo     DateTime?     @map("valid_to")
   tenant      Tenant        @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   officers    CompanyOfficer[]
   shareholders Shareholder[]
@@ -190,6 +229,9 @@ model Company {
   vehicles    Vehicle[]
   permits     CompanyPermit[]
   permitEvents CompanyPermitEvent[]
+  tenantLevelOfficers Officer[] @relation("CompanyOfficerLinks")
+  vehicleAssignments VehicleAssignment[]
+  driverAssignments DriverAssignment[]
 
   @@index([tenantId])
   @@unique([tenantId, companyId])
@@ -232,6 +274,208 @@ model CompanyPermitEvent {
   @@map("company_permit_events")
 }
 
+model TenantIdentity {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  currentFlag Boolean  @default(false) @map("current_flag")
+  legalName   String?  @map("legal_name")
+  legalForm   String?  @map("legal_form")
+  seatAddress String?  @map("seat_address")
+  validFrom   DateTime? @map("valid_from")
+  validTo     DateTime? @map("valid_to")
+  tenant      Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, currentFlag])
+  @@map("tenant_identity")
+}
+
+model TenantIdentifier {
+  id          String   @id @default(uuid()) @map("id")
+  tenantId    String   @map("tenant_id")
+  idType      String   @map("id_type")
+  idValue     String   @map("id_value")
+  countryCode String?  @map("country_code")
+  validFrom   DateTime? @map("valid_from")
+  validTo     DateTime? @map("valid_to")
+  primaryFlag Boolean  @default(false) @map("primary_flag")
+  tenant      Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([idType])
+  @@index([tenantId, primaryFlag])
+  @@unique([tenantId, idType, idValue, validFrom])
+  @@map("tenant_ids")
+}
+
+model Party {
+  partyId     String        @id @default(uuid()) @map("party_id")
+  type        String
+  displayName String        @map("display_name")
+  shareholdings Shareholding[]
+  officers    Officer[]
+  driverAssignments DriverAssignment[]
+
+  @@map("party")
+}
+
+model Shareholding {
+  id           String   @id @default(uuid()) @map("id")
+  tenantId     String   @map("tenant_id")
+  partyId      String   @map("party_id")
+  roleType     String   @map("role_type")
+  quotaPercent Float?  @map("quota_percent")
+  einlageAmount Float?  @map("einlage_amount")
+  liability    String?  @map("liability")
+  validFrom    DateTime? @map("valid_from")
+  validTo      DateTime? @map("valid_to")
+  tenant       Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  party        Party    @relation(fields: [partyId], references: [partyId], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([partyId])
+  @@map("shareholdings")
+}
+
+model Officer {
+  id         String   @id @default(uuid()) @map("id")
+  level      String   @map("level")
+  tenantId   String?  @map("tenant_id")
+  companyId  String?  @map("company_id")
+  partyId    String   @map("party_id")
+  officerType String  @map("officer_type")
+  validFrom  DateTime? @map("valid_from")
+  validTo    DateTime? @map("valid_to")
+  tenant     Tenant?  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  company    Company? @relation("CompanyOfficerLinks", fields: [companyId], references: [companyId], onDelete: Cascade)
+  party      Party    @relation(fields: [partyId], references: [partyId], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([partyId])
+  @@map("officers")
+}
+
+model VehicleAssignment {
+  id          String   @id @default(uuid()) @map("id")
+  vehicleId   String   @map("vehicle_id")
+  tenantId    String   @map("tenant_id")
+  companyId   String   @map("company_id")
+  assignedFrom DateTime @map("assigned_from")
+  assignedTo  DateTime? @map("assigned_to")
+  approvalId  String?  @map("approval_id")
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [vehicleId], onDelete: Cascade)
+  tenant      Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([tenantId])
+  @@index([companyId])
+  @@map("vehicle_assignments")
+}
+
+model DriverAssignment {
+  id          String   @id @default(uuid()) @map("id")
+  partyId     String   @map("party_id")
+  tenantId    String   @map("tenant_id")
+  companyId   String   @map("company_id")
+  assignedFrom DateTime @map("assigned_from")
+  assignedTo  DateTime? @map("assigned_to")
+  approvalId  String?  @map("approval_id")
+  party       Party    @relation(fields: [partyId], references: [partyId], onDelete: Cascade)
+  tenant      Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+
+  @@index([partyId])
+  @@index([tenantId])
+  @@index([companyId])
+  @@map("driver_assignments")
+}
+
+model ApprovalRequest {
+  id             String   @id @default(uuid()) @map("id")
+  tenantId       String   @map("tenant_id")
+  scope          String   @map("scope")
+  objectId       String?  @map("object_id")
+  op             String   @map("op")
+  payload        String?  @map("payload")
+  status         String   @map("status")
+  idempotencyKey String?  @map("idempotency_key") @unique
+  createdAt      DateTime @default(now()) @map("created_at")
+  tenant         Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("approvals")
+}
+
+model Attachment {
+  id             String   @id @default(uuid()) @map("id")
+  ownerType      String   @map("owner_type")
+  ownerId        String   @map("owner_id")
+  attachmentType String   @map("attachment_type")
+  fileRef        String   @map("file_ref")
+  issuedAt       DateTime? @map("issued_at")
+  sourceUrl      String?  @map("source_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([ownerType, ownerId])
+  @@map("attachments")
+}
+
+model EntityStatusEvent {
+  id        String   @id @default(uuid()) @map("id")
+  tenantId  String?  @map("tenant_id")
+  entityType String  @map("entity_type")
+  entityId  String   @map("entity_id")
+  status    String?  @map("status")
+  validTo   DateTime? @map("valid_to")
+  note      String?  @map("note")
+  createdAt DateTime @default(now()) @map("created_at")
+  tenant    Tenant?  @relation(fields: [tenantId], references: [tenantId], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([entityType, entityId])
+  @@map("entity_status_events")
+}
+
+model CorporateAction {
+  actionId       String   @id @default(uuid()) @map("action_id")
+  actionType     String   @map("action_type")
+  effectiveDate  DateTime @map("effective_date")
+  sourceTenantIds String  @map("source_tenant_ids")
+  targetTenantId String   @map("target_tenant_id")
+  note           String?  @map("note")
+  targetTenant   Tenant   @relation(fields: [targetTenantId], references: [tenantId], onDelete: Cascade)
+
+  @@index([targetTenantId])
+  @@index([effectiveDate])
+  @@map("corporate_actions")
+}
+
+model Mandate {
+  id             String    @id @default(uuid()) @map("mandate_id")
+  tenantId       String    @map("tenant_id")
+  organizationId String?   @map("organization_id")
+  companyId      String?   @map("company_id")
+  title          String
+  mandateType    String    @map("mandate_type")
+  status         String    @default("Draft")
+  validFrom      DateTime? @map("valid_from")
+  validTo        DateTime? @map("valid_to")
+  notes          String?   @map("notes")
+  metaJson       String?   @map("meta_json")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  tenant         Tenant    @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([organizationId])
+  @@index([companyId])
+  @@map("mandates")
+}
+
 model VehicleAuthorization {
   id           String   @id @default(uuid())
   permitId     String   @map("permit_id")
@@ -256,10 +500,13 @@ model Vehicle {
   seatCount Int?          @map("seat_count")
   usage     String?
   status    String        @default("Active")
+  validTo   DateTime?     @map("valid_to")
   tenant    Tenant        @relation(fields: [tenantId], references: [tenantId])
   company   Company       @relation(fields: [companyId], references: [companyId])
   authorizations VehicleAuthorization[]
+  assignments VehicleAssignment[]
 
+  @@unique([tenantId, plateNo])
   @@map("vehicles")
 }
 

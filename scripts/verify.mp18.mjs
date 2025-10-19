@@ -47,41 +47,42 @@ async function main() {
     fs.writeFileSync(REPORT, lines.join("\n")); return;
   }
   lines.push(`\n## Tenant`);
-  lines.push(`- id: ${tenant.id}`);
-  lines.push(`- code: ${tenant.code}`);
+  lines.push(`- tenantId: ${tenant.tenantId}`);
+  lines.push(`- legalName: ${tenant.legalName}`);
 
   // 3) companies list & create→detail
   lines.push(`\n## Companies`);
-  const listC = await fetchJSON(`${BASE}/companies`, H({ "x-tenant-id": tenant.id }));
+  const listC = await fetchJSON(`${BASE}/companies`, H({ "x-tenant-id": tenant.tenantId }));
   lines.push(`- list status: ${listC.status} (count=${(listC.body.items || []).length})`);
   if (listC.status !== 200) { lines.push("```json"); lines.push(JSON.stringify(listC.body, null, 2)); lines.push("```"); }
 
   const cname = `Verify GmbH ${Date.now()}`;
+  const gisa = `GISA${Date.now()}`;
   const cCreate = await fetchJSON(`${BASE}/companies`, {
-    method: "POST", ...H({ "x-tenant-id": tenant.id, "Content-Type": "application/json" }),
-    body: JSON.stringify({ legalName: cname, legalForm: "GmbH" })
+    method: "POST", ...H({ "x-tenant-id": tenant.tenantId, "Content-Type": "application/json" }),
+    body: JSON.stringify({ companyId: gisa, legalName: cname, address: "Teststrasse 1, 1010 Wien" })
   });
   lines.push(`- create status: ${cCreate.status}`);
   if (cCreate.status !== 201) { lines.push("```json"); lines.push(JSON.stringify(cCreate.body, null, 2)); lines.push("```"); }
-  const newCompanyId = cCreate.body?.company?.id;
+  const newCompanyId = cCreate.body?.company?.companyId;
 
   if (newCompanyId) {
-    const cDetail = await fetchJSON(`${BASE}/companies/${newCompanyId}`, H({ "x-tenant-id": tenant.id }));
+    const cDetail = await fetchJSON(`${BASE}/companies/${newCompanyId}`, H({ "x-tenant-id": tenant.tenantId }));
     lines.push(`- detail status: ${cDetail.status}, officers=${(cDetail.body.company?.officers || []).length}, shareholders=${(cDetail.body.company?.shareholders || []).length}, docs=${(cDetail.body.company?.documents || []).length}`);
   }
 
   // 4) OUs: list → create → update → delete (best-effort)
   lines.push(`\n## OUs`);
-  const ouList = await fetchJSON(`${BASE}/ous`, H({ "x-tenant-id": tenant.id }));
+  const ouList = await fetchJSON(`${BASE}/ous`, H({ "x-tenant-id": tenant.tenantId }));
   lines.push(`- list status: ${ouList.status}, count=${(ouList.body.items || []).length}`);
   const ouName = `OU ${new Date().toLocaleTimeString()}`;
-  const ouCreate = await fetchJSON(`${BASE}/ous`, { method: "POST", ...H({ "x-tenant-id": tenant.id, "Content-Type": "application/json" }), body: JSON.stringify({ name: ouName }) });
+  const ouCreate = await fetchJSON(`${BASE}/ous`, { method: "POST", ...H({ "x-tenant-id": tenant.tenantId, "Content-Type": "application/json" }), body: JSON.stringify({ name: ouName }) });
   lines.push(`- create status: ${ouCreate.status}`);
   const ouId = ouCreate.body?.ou?.id;
   if (ouId) {
-    const ouUpdate = await fetchJSON(`${BASE}/ous/${ouId}`, { method: "PUT", ...H({ "x-tenant-id": tenant.id, "Content-Type": "application/json" }), body: JSON.stringify({ name: `${ouName}*` }) });
+    const ouUpdate = await fetchJSON(`${BASE}/ous/${ouId}`, { method: "PUT", ...H({ "x-tenant-id": tenant.tenantId, "Content-Type": "application/json" }), body: JSON.stringify({ name: `${ouName}*` }) });
     lines.push(`- update status: ${ouUpdate.status}`);
-    const ouDelete = await fetchJSON(`${BASE}/ous/${ouId}`, { method: "DELETE", ...H({ "x-tenant-id": tenant.id }) });
+    const ouDelete = await fetchJSON(`${BASE}/ous/${ouId}`, { method: "DELETE", ...H({ "x-tenant-id": tenant.tenantId }) });
     lines.push(`- delete status: ${ouDelete.status}`);
   }
 
@@ -99,4 +100,3 @@ main().catch(e => {
   console.error(e);
   process.exit(1);
 }).finally(() => prisma.$disconnect());
-

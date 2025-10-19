@@ -1,7 +1,7 @@
 import { loadHeader } from '../core.header/index.module.js';
 import { loadSidebar } from '../core.sidebar/index.module.js';
 import { Router } from '../core.router/index.module.js';
-import { user } from '../core.user/user.data.module.js';
+import { loadCurrentUser, IDENTITY_LOGIN_URL, expireAuthCookie, FALLBACK_USER } from '../core.user/user.data.module.js';
 import { AppState } from '../core.state/app.state.module.js';
 import FooterModule from '../core.footer/index.module.js';
 import { ErrorBoundary } from '../core.error/index.module.js';
@@ -36,6 +36,32 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
   window.AppStateRef = AppState;
   await AppState.loadTranslations();
+  let user;
+  try {
+    user = await loadCurrentUser();
+  } catch (error) {
+    if (error?.redirect) {
+      expireAuthCookie();
+      location.href = error.redirect || IDENTITY_LOGIN_URL;
+      return;
+    }
+    console.error('[core.app] falling back to static user:', error);
+    user = FALLBACK_USER;
+  }
+
+  const hasStoredPreferences = Boolean(localStorage.getItem('AppState'));
+  if (!hasStoredPreferences) {
+    if (user.language) {
+      AppState.setLanguage(user.language);
+    }
+    if (user.preferredTheme === 'system' || user.preferredTheme === 'autoSun') {
+      AppState.setThemeMode(user.preferredTheme);
+    } else if (user.preferredTheme === 'dark' || user.preferredTheme === 'light') {
+      AppState.setThemeMode('manual');
+      AppState.setTheme(user.preferredTheme);
+    }
+  }
+
   loadHeader(document.getElementById('header'), user);
   loadSidebar(document.getElementById('sidebar'), user);
   await Router.init();

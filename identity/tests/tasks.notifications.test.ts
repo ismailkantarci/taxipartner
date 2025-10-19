@@ -1,12 +1,14 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { setTimeout as wait } from 'node:timers/promises';
 
 const PORT = 3456;
-let child;
+let child: ChildProcess | null = null;
 
-async function req(path, init = {}) {
+type JsonRequestInit = RequestInit & { headers?: Record<string, string> };
+
+async function req(path: string, init: JsonRequestInit = {}) {
   const url = `http://127.0.0.1:${PORT}${path}`;
   const response = await fetch(url, {
     ...init,
@@ -44,7 +46,11 @@ before(async () => {
 });
 
 after(() => {
-  try { child?.kill('SIGINT'); } catch {}
+  try {
+    if (child) {
+      child.kill('SIGINT');
+    }
+  } catch {}
 });
 
 test('health responds ok', async () => {

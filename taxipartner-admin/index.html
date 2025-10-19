@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="de" class="dark" data-theme="taxipartner">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>TAXIPartner Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/taxi.svg" />
+  </head>
+  <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <header class="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+        <img src="/taxi.svg" class="w-6 h-6" alt="logo"/>
+        <h1 class="font-semibold">TAXIPartner Admin</h1>
+
+        <!-- Tenant Switcher -->
+        <div class="relative ml-4">
+          <button id="tenantButton"
+                  data-dropdown-toggle="tenantMenu"
+                  class="btn btn-sm">
+            <span class="opacity-70 me-2">Tenant:</span>
+            <span id="tenantCurrentBtn" class="font-medium">—</span>
+            <svg class="w-4 h-4 ms-2 inline-block" viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"/></svg>
+          </button>
+
+          <div id="tenantMenu" class="z-50 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-64 dark:bg-gray-800 dark:divide-gray-700">
+            <div class="p-2">
+              <input id="tenantFilter" type="text" placeholder="Ara..."
+                     class="input input-bordered input-sm w-full" />
+            </div>
+            <ul id="tenantList" class="py-2 text-sm text-gray-700 dark:text-gray-200">
+              <li><button class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700" data-tenant-name="Reftiss KG">Reftiss KG</button></li>
+              <li><button class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover-bg-gray-700" data-tenant-name="TAXIPartner GmbH">TAXIPartner GmbH</button></li>
+              <li><button class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700" data-tenant-name="KMS Kompakt Management Service GmbH">KMS Kompakt Management Service GmbH</button></li>
+            </ul>
+          </div>
+        </div>
+
+        <button id="themeToggle" class="ml-auto btn btn-sm">Dark/Light</button>
+        <button data-invoice-open class="btn btn-sm">
+          Fatura Yükle (OCR)
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <div class="alert alert-info shadow"><span>Flowbite + DaisyUI + Preline hazır 🎯</span></div>
+
+      <div class="card p-6">
+        <h2 class="font-semibold mb-4">Hızlı Başlangıç</h2>
+        <div class="mb-4 text-sm opacity-80">
+          Aktif Tenant: <span id="tenantCurrentLabel" class="font-semibold align-middle"></span>
+        </div>
+        <button class="btn btn-primary" data-modal-target="m1" data-modal-toggle="m1">Modal Aç</button>
+        <button class="btn btn-primary" data-wizard-open>Company Wizard</button>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-3">
+          <h2 class="font-semibold">Şirketler</h2>
+          <div class="flex items-center gap-2 flex-wrap">
+            <input id="tblSearch" class="input input-bordered input-sm" placeholder="Ara (ad, uid, durum)" />
+            <select id="tblSize" class="select select-bordered select-sm">
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+            <div class="text-sm opacity-70"><span id="tblInfo">—</span></div>
+            <div class="join">
+              <button id="tblPrev" class="btn btn-sm join-item">Önceki</button>
+              <button id="tblNext" class="btn btn-sm join-item">Sonraki</button>
+            </div>
+          </div>
+        </div>
+        <div id="companyTable"></div>
+      </div>
+
+      <!-- RBAC Permission Matrix -->
+      <div class="card overflow-hidden">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex items-center gap-3">
+            <h2 class="font-semibold">RBAC Permission Matrix</h2>
+            <input id="rbacFilter" class="input input-bordered input-sm" placeholder="Role ara..." />
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="rbacClear" class="btn btn-sm">Varsayılanı Yükle</button>
+            <button id="rbacExport" class="btn btn-sm btn-primary">JSON Dışa Aktar</button>
+          </div>
+        </div>
+        <div id="rbacMatrix"></div>
+        <div class="p-4">
+          <h3 class="mb-2 text-sm font-medium opacity-80">Aktif RBAC JSON</h3>
+          <pre id="rbacJson" class="h-40 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs dark:border-gray-700 dark:bg-gray-900"></pre>
+        </div>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex items-center gap-2">
+            <h2 class="font-semibold">CSV Dienstplan</h2>
+            <input id="schedQuery" class="input input-bordered input-sm" placeholder="Ara (sürücü, gün, araç, not)" />
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="schedFile" type="file" accept=".csv" class="file-input file-input-bordered file-input-sm" />
+            <button id="schedSample" class="btn btn-sm">Örnek Yükle</button>
+            <button id="schedExport" class="btn btn-sm btn-primary">JSON Dışa Aktar</button>
+            <button id="schedClear" class="btn btn-sm">Temizle</button>
+          </div>
+        </div>
+        <div class="px-4 py-3 text-sm opacity-80">
+          <span id="schedInfo">—</span>
+        </div>
+        <div id="schedTable"></div>
+      </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="m1" class="hidden fixed inset-0 z-50 overflow-y-auto">
+      <div class="relative p-4 w-full max-w-md mx-auto mt-24">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
+            <h3 class="text-lg font-semibold">Merhaba</h3>
+            <button data-modal-hide="m1" class="text-gray-400 hover:text-gray-900 dark:hover:text-white">×</button>
+          </div>
+          <div class="p-4">MIT-only stack kuruldu. Tenant seçimi yerel depoda tutulur.</div>
+          <div class="p-4 border-t dark:border-gray-700 flex justify-end">
+            <button data-modal-hide="m1" class="btn">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Wizard (Flowbite modal + custom steps) -->
+    <div id="w_modal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden">
+      <div class="relative p-4 w-full max-w-2xl mx-auto mt-16">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
+            <h3 class="text-lg font-semibold">Company Wizard</h3>
+            <button data-wizard-close class="text-gray-400 hover:text-gray-900 dark:hover:text-white">×</button>
+          </div>
+
+          <div class="px-6 pt-4 flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-300" data-step-dot></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-300" data-step-dot></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-300" data-step-dot></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-300" data-step-dot></div>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <section data-step="1">
+              <label class="form-control">
+                <span class="label-text">Şirket Adı</span>
+                <input id="w_name" class="input input-bordered" placeholder="Reftiss KG" />
+              </label>
+              <p id="err_name" class="text-sm text-rose-500 hidden mt-1"></p>
+            </section>
+
+            <section data-step="2" class="hidden">
+              <label class="form-control">
+                <span class="label-text">UID (ATU########)</span>
+                <input id="w_uid" class="input input-bordered" placeholder="ATU12345678" />
+              </label>
+              <p id="err_uid" class="text-sm text-rose-500 hidden mt-1"></p>
+            </section>
+
+            <section data-step="3" class="hidden">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <label class="form-control md:col-span-2">
+                  <span class="label-text">Sokak / No</span>
+                  <input id="w_street" class="input input-bordered" placeholder="Musterstraße 12/3" />
+                </label>
+                <label class="form-control">
+                  <span class="label-text">PLZ</span>
+                  <input id="w_zip" class="input input-bordered" placeholder="1010" />
+                </label>
+                <label class="form-control md:col-span-3">
+                  <span class="label-text">Şehir</span>
+                  <input id="w_city" class="input input-bordered" placeholder="Wien" />
+                </label>
+              </div>
+              <p id="err_street" class="text-sm text-rose-500 hidden mt-1"></p>
+              <p id="err_zip" class="text-sm text-rose-500 hidden mt-1"></p>
+              <p id="err_city" class="text-sm text-rose-500 hidden mt-1"></p>
+            </section>
+
+            <section data-step="4" class="hidden">
+              <div id="w_summary" class="p-4 rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"></div>
+            </section>
+          </div>
+
+          <div class="p-4 border-t dark:border-gray-700 flex items-center justify-between">
+            <button id="w_prev" class="btn">Geri</button>
+            <div class="space-x-2">
+              <button data-wizard-close class="btn">İptal</button>
+              <button id="w_next" class="btn">İleri</button>
+              <button id="w_save" class="btn btn-primary">Kaydet</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="rowDrawer"
+      class="fixed top-0 right-0 z-50 h-screen w-96 translate-x-full overflow-y-auto bg-white p-4 transition-transform dark:bg-gray-900 hidden"
+      tabindex="-1"
+      aria-labelledby="rowDrawerLabel"
+      aria-hidden="true"
+    >
+      <h5 id="rowDrawerLabel" class="mb-4 inline-flex items-center text-base font-semibold">Kayıt Detayı</h5>
+      <div id="rowDrawerBody" class="space-y-3 text-sm"></div>
+      <div class="mt-6">
+        <button data-rowdrawer-close aria-controls="rowDrawer" class="btn">Kapat</button>
+      </div>
+    </div>
+
+    <div
+      id="invoiceDrawer"
+      class="fixed top-0 right-0 z-50 h-screen w-[34rem] translate-x-full overflow-y-auto bg-white p-4 transition-transform dark:bg-gray-900 hidden"
+      tabindex="-1"
+      aria-labelledby="invoiceDrawerLabel"
+      aria-hidden="true"
+    >
+      <h5 id="invoiceDrawerLabel" class="mb-4 inline-flex items-center text-base font-semibold">Invoice OCR</h5>
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label class="form-control">
+            <span class="label-text">Dosya</span>
+            <input
+              id="invoiceFile"
+              type="file"
+              accept=".json,image/*,application/pdf"
+              class="file-input file-input-bordered"
+            />
+          </label>
+          <div class="flex gap-2">
+            <button id="simulateOCR" class="btn btn-sm">OCR Simüle Et</button>
+          </div>
+        </div>
+
+        <div>
+          <h6 class="mb-2 text-sm font-medium">Ham OCR Çıktısı</h6>
+          <pre
+            id="ocrRaw"
+            class="h-40 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs dark:border-gray-700 dark:bg-gray-900"
+          ></pre>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="form-control">
+            <span class="label-text">Tarih</span>
+            <select id="map_date" class="select select-bordered select-sm"></select>
+          </label>
+          <label class="form-control">
+            <span class="label-text">Tutar</span>
+            <select id="map_amount" class="select select-bordered select-sm"></select>
+          </label>
+          <label class="form-control">
+            <span class="label-text">Tedarikçi</span>
+            <select id="map_vendor" class="select select-bordered select-sm"></select>
+          </label>
+          <label class="form-control">
+            <span class="label-text">Fatura No</span>
+            <select id="map_invoiceNo" class="select select-bordered select-sm"></select>
+          </label>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="applyMapping" class="btn btn-primary btn-sm">Eşlemeyi Uygula</button>
+        </div>
+
+        <div>
+          <h6 class="mb-2 text-sm font-medium">Eşlenmiş Kayıt</h6>
+          <pre
+            id="mappedJson"
+            class="h-32 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs dark:border-gray-700 dark:bg-gray-900"
+          ></pre>
+        </div>
+
+        <div class="mt-2">
+          <button data-invoice-close aria-controls="invoiceDrawer" class="btn">Kapat</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

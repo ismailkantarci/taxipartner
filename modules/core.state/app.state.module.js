@@ -1,6 +1,8 @@
 // modules/core.state/app.state.module.js
 import { getSunTimes } from '../core.theme/theme.utils.js';
 
+const STORAGE_KEY = 'AppState';
+
 export const AppState = {
   currentUser: null,
   activeModule: null,
@@ -8,6 +10,12 @@ export const AppState = {
   theme: 'light',
   themeMode: 'manual', // 'manual' | 'system' | 'autoSun'
   tenant: null,
+  sidebar: {
+    open: false,
+    mode: 'expanded' // 'expanded' | 'collapsed'
+  },
+  tablePreferences: {},
+  asyncFlags: {},
   translations: {},
   ready: false,
   debug: false,
@@ -65,6 +73,65 @@ export const AppState = {
     this.themeMode = mode;
     this.saveToStorage();
     this.applyThemeStrategy();
+  },
+
+  setSidebarOpen(open) {
+    this.sidebar.open = open;
+    // open state is transient; do not persist separately
+  },
+
+  toggleSidebarOpen() {
+    this.setSidebarOpen(!this.sidebar.open);
+  },
+
+  setSidebarMode(mode) {
+    if (mode !== 'expanded' && mode !== 'collapsed') return;
+    if (this.sidebar.mode === mode) return;
+    this.sidebar.mode = mode;
+    this.saveToStorage();
+  },
+
+  isSidebarCollapsed() {
+    return this.sidebar.mode === 'collapsed';
+  },
+
+  getTablePrefs(tableId) {
+    if (!tableId) return { columnVisibility: {}, sorting: [], columnOrder: [], filters: {} };
+    return this.tablePreferences?.[tableId] || { columnVisibility: {}, sorting: [], columnOrder: [], filters: {} };
+  },
+
+  updateTablePrefs(tableId, updater) {
+    if (!tableId) return;
+    const current = this.getTablePrefs(tableId);
+    const next = typeof updater === 'function' ? updater(current) : { ...current, ...updater };
+    this.tablePreferences = {
+      ...this.tablePreferences,
+      [tableId]: {
+        columnVisibility: next.columnVisibility || {},
+        sorting: next.sorting || [],
+        columnOrder: next.columnOrder || [],
+        filters: next.filters || {}
+      }
+    };
+    this.saveToStorage();
+  },
+
+  clearTablePrefs(tableId) {
+    if (!tableId) return;
+    if (!this.tablePreferences || !(tableId in this.tablePreferences)) return;
+    const next = { ...this.tablePreferences };
+    delete next[tableId];
+    this.tablePreferences = next;
+    this.saveToStorage();
+  },
+
+  setAsyncFlag(key, value) {
+    if (!key) return;
+    this.asyncFlags = { ...this.asyncFlags, [key]: !!value };
+  },
+
+  getAsyncFlag(key) {
+    return !!this.asyncFlags?.[key];
   },
 
   _onMediaChange: null,
@@ -148,32 +215,51 @@ export const AppState = {
 
   reset() {
     this.currentUser = null;
-    this.activeModule = null;
+  	this.activeModule = null;
     this.language = 'de-AT';
     this.theme = 'light';
     this.tenant = null;
   },
 
   saveToStorage() {
-    localStorage.setItem('AppState', JSON.stringify({
+    const payload = {
       language: this.language,
       theme: this.theme,
       themeMode: this.themeMode,
-      tenant: this.tenant
-    }));
+      tenant: this.tenant,
+      sidebar: this.sidebar,
+      tablePreferences: this.tablePreferences
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (_) {}
   },
 
   loadFromStorage() {
-    const saved = JSON.parse(localStorage.getItem('AppState') || '{}');
-    if (saved.language) this.language = saved.language;
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (_) {
+      saved = null;
+    }
+    if (saved?.language) this.language = saved.language;
     // Theme: if not saved, respect OS preference
     if (saved.theme) {
       this.theme = saved.theme;
     } else if (window?.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       this.theme = 'dark';
     }
-    if (saved.themeMode) this.themeMode = saved.themeMode;
-    if (saved.tenant) this.tenant = saved.tenant;
+    if (saved?.themeMode) this.themeMode = saved.themeMode;
+    if (saved?.tenant) this.tenant = saved.tenant;
+    if (saved?.sidebar && typeof saved.sidebar === 'object') {
+      this.sidebar = {
+        open: false,
+        mode: saved.sidebar.mode === 'collapsed' ? 'collapsed' : 'expanded'
+      };
+    }
+    if (saved?.tablePreferences && typeof saved.tablePreferences === 'object') {
+      this.tablePreferences = saved.tablePreferences;
+    }
   },
 
   hasRole(role) {

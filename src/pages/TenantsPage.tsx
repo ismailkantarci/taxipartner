@@ -1,0 +1,91 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import RequirePermission from '../components/rbac/RequirePermission';
+import { useTranslation } from '../lib/i18n';
+import { TenantsPage as TenantsReactPage } from '../features/tenants';
+
+const USE_REACT_TENANTS =
+  import.meta.env.VITE_USE_REACT_TENANTS === 'true' ||
+  import.meta.env.VITE_USE_REACT_TENANTS === '1';
+
+const LegacyTenantsContent: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    let cleanup: (() => void) | void;
+
+    const mount = async () => {
+      if (!containerRef.current) return;
+      setStatus('loading');
+      try {
+        const mod = await import('../../frontend/tenants/page.ts');
+        if (!mounted) return;
+        const result = await mod.mountTenantsPage(containerRef.current);
+        if (!mounted) return;
+        cleanup = typeof result === 'function' ? result : undefined;
+        setStatus('ready');
+      } catch (err) {
+        if (!mounted) return;
+        console.error('[tenants] failed to mount legacy module', err);
+        setError(err instanceof Error ? err.message : t('route.error.generic'));
+        setStatus('error');
+      }
+    };
+
+    void mount();
+
+    return () => {
+      mounted = false;
+      if (cleanup) {
+        try {
+          cleanup();
+        } catch (err) {
+          console.warn('[tenants] cleanup failed', err);
+        }
+      }
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
+  }, []);
+
+  return (
+    <section className="flex flex-1 flex-col gap-4">
+      <header>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+          {t('tenants.page.title')}
+        </h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          {t('tenants.page.legacyNotice')}
+        </p>
+      </header>
+      {status === 'error' ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-200">
+          {error ?? t('tenants.page.moduleLoadFailed')}
+        </div>
+      ) : null}
+      {status !== 'ready' ? (
+        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-300">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          {t('tenants.page.loading')}
+        </div>
+      ) : null}
+      <div
+        ref={containerRef}
+        className="min-h-[480px] rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      />
+    </section>
+  );
+};
+
+const TenantsPage: React.FC = () => (
+  <RequirePermission permission="tenants.manage">
+    {USE_REACT_TENANTS ? <TenantsReactPage /> : <LegacyTenantsContent />}
+  </RequirePermission>
+);
+
+export default TenantsPage;

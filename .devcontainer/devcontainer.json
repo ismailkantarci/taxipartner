@@ -1,0 +1,36 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "postCreateCommand": "./tp setup",
+  "postStartCommand": [
+    "./tp start",
+    "./tp lighthouse"
+  ],
+  "forwardPorts": [
+    3000,
+    5173,
+    5174,
+    8080
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "identity-api",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "5173": {
+      "label": "admin-vite",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "5174": {
+      "label": "identity-spa",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "8080": {
+      "label": "admin-nginx",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    }
+  }
+}

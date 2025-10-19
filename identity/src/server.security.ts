@@ -3,13 +3,15 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
 export function applySecurity(app: any) {
+  // trust GitHub Codespaces/forward proxies so express-rate-limit sees correct IP
+  app.set('trust proxy', 1);
   app.use(helmet());
   const raw = (process.env.DEV_CORS_ORIGINS || "").trim();
   const allow = raw ? raw.split(/\s+/) : [];
   const allowAll = allow.includes('*');
   app.use(
     cors({
-      origin: (origin, cb) => {
+      origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
         if (!origin) return cb(null, true);
         if (allowAll) return cb(null, true);
         if (allow.length && allow.includes(origin)) return cb(null, true);

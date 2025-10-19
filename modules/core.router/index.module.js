@@ -4,16 +4,32 @@ import { Telemetry } from '../core.telemetry/index.module.js';
 
 const routes = {
   '/': 'Dashboard',
-  '/releases': 'ReleaseManagement',
-  '/users': 'UserManagement',
-  '/companies': 'Companies',
-  '/tenants': 'Tenants',
-  '/ous': 'OUs',
-  '/settings': 'Settings',
-  '/analytics': 'Analytics',
-  '/404': 'NotFound',
-  '/reports': 'Dashboard'
+  '/dashboard': 'Dashboard',
+  '/iam/users': 'UserManagement',
+  '/iam/roles': 'IAMRoles',
+  '/iam/permissions': 'IAMPermissions',
+  '/iam/sessions': 'IAMSessions',
+  '/iam/audit-logs': 'IAMAuditLogs',
+  '/tenants/tenants': 'Tenants',
+  '/tenants/organizations': 'Organizations',
+  '/tenants/companies': 'Companies',
+  '/tenants/mandates': 'Mandates',
+  '/tenants/ous': 'OUs',
+  '/tenants/vehicles': 'Vehicles',
+  '/program/goals': 'ProgramGoals',
+  '/program/audits': 'ProgramAudits',
+  '/compliance': 'Compliance',
+  '/risk': 'Risk',
+  '/assets': 'Assets',
+  '/controls': 'Controls',
+  '/secops': 'SecOps',
+  '/system': 'System',
+  '/404': 'NotFound'
 };
+
+const protectedRoutes = new Set(
+  Object.keys(routes).filter((route) => !['/', '/dashboard', '/404'].includes(route))
+);
 
 function parseHash() {
   const raw = location.hash.replace(/^#/, '') || '/';
@@ -33,8 +49,10 @@ export const Router = {
     try {
       const user = (window.AppStateRef && window.AppStateRef.currentUser) || null;
       const isAdmin = !!(user && Array.isArray(user.roles) && user.roles.includes('admin'));
-      if ((key === '/users' || key === '/settings' || key === '/releases' || key === '/analytics') && !isAdmin) {
+      if (protectedRoutes.has(key) && !isAdmin) {
         await ModuleLoader.load('AccessDenied', { append: false });
+        Telemetry?.end?.('route', { route: key, blocked: true });
+        document.dispatchEvent(new CustomEvent('router:navigated', { detail: { route: key } }));
         return;
       }
     } catch {}
@@ -45,10 +63,16 @@ export const Router = {
       links.forEach(a => {
         const isActive = a.getAttribute('href') === `#${key}`;
         a.setAttribute('aria-current', isActive ? 'page' : 'false');
-        a.classList.toggle('bg-gray-100', isActive);
-        a.classList.toggle('font-semibold', isActive);
+        a.dataset.active = String(isActive);
+        a.classList.toggle('bg-brand-50', isActive);
+        a.classList.toggle('text-brand-700', isActive);
+        a.classList.toggle('dark:bg-brand-500/20', isActive);
+        a.classList.toggle('dark:text-brand-100', isActive);
+        a.classList.toggle('text-gray-600', !isActive);
+        a.classList.toggle('dark:text-gray-300', !isActive);
       });
     } catch {}
+    document.dispatchEvent(new CustomEvent('router:navigated', { detail: { route: key } }));
   },
   async init() {
     window.addEventListener('hashchange', () => this.navigate(parseHash()));

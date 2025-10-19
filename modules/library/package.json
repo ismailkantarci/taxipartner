@@ -1,0 +1,31 @@
+{
+  "name": "@taxipartner/library",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TAXIPartner tasarım sistemi ve paylaşımlı bileşen kütüphanesi",
+  "keywords": [
+    "design-system",
+    "taxipartner",
+    "ui-library"
+  ],
+  "scripts": {
+    "build": "vite build --config ./vite.config.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./components/phone-input": "./dist/components/phone-input/phone-input.js",
+    "./components/phone-input/phone-input.js": "./dist/components/phone-input/phone-input.js",
+    "./tokens": "./dist/tokens/index.js",
+    "./tokens/index.js": "./dist/tokens/index.js",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "intl-tel-input": "^25.11.3"
+  }
+}
