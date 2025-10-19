@@ -28,6 +28,7 @@ import RiskListPage from './pages/risk/RiskListPage';
 import RiskDetailPage from './pages/risk/RiskDetailPage';
 import RequirePermission from './components/rbac/RequirePermission';
 import TenantsPage from './pages/TenantsPage';
+import TenantDetailPage from './pages/TenantDetailPage';
 import CompaniesPage from './pages/CompaniesPage';
 import OrganizationsPage from './pages/OrganizationsPage';
 import ShareholdersPage from './pages/ShareholdersPage';
@@ -129,6 +130,7 @@ const App: React.FC = () => (
           </RequirePermission>
         }
       />
+      <Route path="/tenants/:tenantId" element={<TenantDetailPage />} />
       <Route
         path="/tenants/organizations"
         element={

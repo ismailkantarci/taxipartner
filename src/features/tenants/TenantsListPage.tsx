@@ -57,7 +57,7 @@ const mapStatusOptions = (t: ReturnType<typeof useTranslation>['t']) =>
     label: t(option.labelKey, { defaultValue: option.fallback })
   }));
 
-const TenantsPage: React.FC = () => {
+const TenantsListPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -129,7 +129,7 @@ const TenantsPage: React.FC = () => {
               name="tenant-selection"
               aria-label={t('tenants.table.selectTenant', {
                 defaultValue: 'Select {{tenant}}',
-                tenant: record.legalName
+                values: { tenant: record.legalName }
               })}
               checked={isSelected}
               onChange={event => {
@@ -353,7 +353,7 @@ const TenantsPage: React.FC = () => {
   };
 
   const statusLabel = statusOptions.find(option => option.value === status)?.label ?? status;
-  const sortLabel = sortOptions.find(option => option.value === (sort ?? ''))?.label ?? sort;
+  const sortLabel = sortOptions.find(option => option.value === (sort ?? ''))?.label ?? sort ?? 'name';
 
   return (
     <section className="flex flex-1 flex-col gap-6">
@@ -723,4 +723,4 @@ const TenantsPage: React.FC = () => {
   );
 };
 
-export default TenantsPage;
+export default TenantsListPage;

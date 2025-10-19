@@ -44,7 +44,7 @@ New feature modules should compose these building blocks so visuals and behaviou
 
 ## Feature Flags
 
-- Set `VITE_USE_REACT_TENANTS=true` (or `1`) to enable the React-native tenants experience (`src/features/tenants/TenantsPage.tsx`) instead of the legacy bridge during the transition.
+- Set `VITE_USE_REACT_TENANTS=true` (or `1`) to enable the React-native tenants experience (`src/features/tenants/TenantsListPage.tsx`) instead of the legacy bridge during the transition.
 
 ## Migration Progress
 

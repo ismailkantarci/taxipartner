@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import RequirePermission from '../components/rbac/RequirePermission';
 import { useTranslation } from '../lib/i18n';
-import { TenantsPage as TenantsReactPage } from '../features/tenants';
+import { TenantsListPage as TenantsReactPage } from '../features/tenants';
 
 const USE_REACT_TENANTS =
   import.meta.env.VITE_USE_REACT_TENANTS === 'true' ||
