@@ -1,0 +1,8 @@
+{
+  "name": "Library",
+  "version": "1.3.1100",
+  "type": "informational",
+  "entry": "index.module.js",
+  "author": "TAXIPartner",
+  "description": "Showcases shared design-system tokens and reusable components."
+}

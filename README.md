@@ -7,6 +7,52 @@
 - `npm test` – vitest unit tests
 - `npm run sandbox` – docs/style-sandbox.html için hafif statik sunucu (QA/görsel inceleme)
 
+## Frontpage'e Erişim
+Üretim/ön izleme ortamı ve yerel geliştirme için erişim adımları aşağıdadır:
+
+### Canlı (Yerel Değil)
+- **Aktif hostu bul**: Operasyon ekibi henüz `admin.taxipartner.at` DNS kaydını canlı ortama yönlendirmedi. Son deploy çıktısındaki host bilgisini (örn. `deploy-prod` workflow notlarında yer alan `PUBLIC_ADMIN_HOST`) alın veya doğrudan Ops'tan isteyin.
+- **Hedef domain**: <https://admin.taxipartner.at/#/> adresi canlıya alındığında Frontpage/Dashboard burada servis edilecek. DNS devreye girene kadar aşağıdaki adımlarda `https://<opsin-paylastigi-host>/#/` şeklindeki gerçek hostu kullanın.
+- **Doğrudan giriş ekranı**: `<HOST>/#/auth/login` — tarayıcı sizi kimlik sağlayıcısına (Identity) yönlendirir.
+- **Adımlar**:
+  1. Şirket ağı/VPN üzerindeyken Ops'ın sağladığı host için `<HOST>/#/auth/login` adresine gidin (UTF-8 içerik, hash tabanlı router).
+  2. Kurumsal kimlik bilgilerinizle giriş yapın; MFA etkinse doğrulamayı tamamlayın.
+  3. Başarılı oturum açma sonrasında otomatik olarak `<HOST>/#/` (Frontpage/Dashboard) yüklenir.
+- Tenant, dil (`de-AT` varsayılanı, `tr-TR` ve `en-GB` alternatifleri) ve sürüm seçimi oturum açmış kullanıcı rolüne göre modüler olarak yüklenir; tüm içerik UTF-8 uyumludur.
+- Şirket içi kimlik sağlayıcısı (Identity) üzerinden oturum açmanız gerekir; erişim yetkiniz yoksa ilgili tenant yöneticisinden davet isteyin.
+
+### Yerel Geliştirme
+Yerel geliştirme sırasında ön yüzü görüntülemek için aşağıdaki adımları izleyin:
+
+1. `cp .env.example .env` komutuyla temel ortam değişkenlerini hazırlayın (içerik UTF-8 uyumludur).
+2. `npm install` çalıştırarak bağımlılıkları kurun.
+3. `npm run dev` komutunu başlatın; Vite varsayılan olarak `http://localhost:5173` adresinde hizmet verir.
+4. Tarayıcıda `http://localhost:5173/#/` adresine giderek varsayılan Dashboard/Frontpage ekranını açın. Hash tabanlı router otomatik olarak `modules/core.router/index.module.js` üzerinden `Dashboard` modülünü yükler.
+
+> Not: Prod derlemesi için `npm run build` ve ardından `npm run preview` komutlarıyla statik çıktıyı (`dist/`) test edebilir, aynı URL üzerinden erişebilirsiniz. Çok dilli içerik modüller tarafından yönetilir; uygulama Almanca (`de-AT`) varsayılanıyla başlar, uygun tenant ve sürüm mantığı `core.app` içinde yüklenir.
+
+## Git Üzerinden Yapılanları İnceleme
+Yerel depo GitHub/GitLab gibi bir uzak sunucuya bağlı olmadığı için Git otomatik olarak “tarayıcı linki” üretmez. Değişiklikleri görmek için şu seçenekleri kullanabilirsiniz:
+
+1. **Yerelde inceleme** – Son commit’i terminalden açmak için `git show HEAD` veya belirli bir commit için `git show <sha>` komutunu çalıştırın. Daha kapsamlı karşılaştırma gerekiyorsa `git log --stat` ve `git diff <from>..<to>` komutları değişiklikleri UTF-8 uyumlu olarak özetler.
+2. **Patch paylaşımı** – Tarayıcı olmadan diff paylaşmak için `git format-patch -1 HEAD` çıktısını bir dosya olarak gönderebilir veya `git diff HEAD^ HEAD > change.diff` ile düz bir diff dosyası hazırlayabilirsiniz.
+3. **Uzak depo ile link üretme** – Eğer incelemeyi tarayıcıdan yapmak istiyorsanız önce bir remote tanımlayın: `git remote add origin https://github.com/<org>/<repo>.git`. Ardından commit’i push (`git push -u origin work`) ettikten sonra GitHub/GitLab commit sayfası otomatik bir URL sunar. UI’deki Compare Panel de `scripts/set_repo_url.py --url https://github.com/<org>/<repo>` komutuyla aynı remote adresine bağlanır ve oradan tek tıkla tarayıcı bağlantısı gösterir.
+
+Bu adımlar Tailwind + modüler init yapısı, çok dillilik (de-AT/tr-TR/en-GB) ve multi-tenant sürümleme ile uyumlu kalır; yalnızca Git inceleme sürecini şeffaflaştırır.
+
+## Easyname (FTP) Üzerinden Yayınlama
+`www.taxipartner.at` şu anda Easyname tarafında barındırıldığı ve FTP erişimi bulunduğu için, Git deposunu kaybetmeden canlıya geçişi aşağıdaki süreçle yönetebilirsiniz:
+
+1. **Git deposu ana kaynak olarak kalır** – Tüm geliştirmeler `git` üzerinde (`/workspace/taxipartner` benzeri bir çalışma kopyasında) yapılır. Easyname FTP alanına yalnızca derlenmiş çıktı gönderilir; depo dosyalarını doğrudan FTP'ye taşımayın.
+2. **Derleme** – Üretim paketini yerelde veya CI'da hazırlamak için `npm run build` çalıştırın. Çıktı UTF-8 uyumlu olarak `dist/` dizinine düşer ve Tailwind + modüler `init(target)` mimarisini korur.
+3. **Çok dillilik ve tenant kontrolü** – `dist/` içindeki `index.html`, `locales/` ve `modules/` içeriği `de-AT`, `tr-TR`, `en-GB` varyantlarını ve tenant bazlı yüklemeyi sürdürür. Easyname ortamına aktarırken bu dizin yapısını aynen koruyun.
+4. **FTP senkronizasyonu** – Easyname'in sağladığı FTP/SFTP hesabına bağlanın. Var olan WIX içeriği korunacaksa, TAXIPartner yönetim arayüzü için ayrı bir alt klasör (`/admin/` gibi) oluşturun. Tam geçişte DNS `admin.taxipartner.at` Easyname barındırmasına yönlendirildiğinde `dist/` içeriğini kök dizine (veya belirlenen alt dizine) yükleyin.
+5. **Sürümleme ve yedek** – Her yayın öncesi Git'te tag/commit oluşturun. FTP'ye yüklenen dosyaların bir kopyasını `release-pack/` veya CI artefaktı olarak saklayın ki gerekirse önceki sürüme dönülebilsin.
+6. **Otomasyon seçeneği** – Manuel FTP yerine `lftp`, `rsync` (SFTP) ya da Easyname API destekliyorsa GitHub Actions/GitLab CI üzerinden otomatik dağıtım betiği kullanın. Bu betik `npm run build` sonrasında yalnızca `dist/` içeriğini aktarır; multi-tenant konfigürasyonlar için `app.config.json` ve `.env.production` dosyalarını aynı klasöre yerleştirmeyi unutmayın.
+7. **Kimlik doğrulama ve backend** – Easyname yalnızca statik dosyaları sunuyorsa, kimlik sağlayıcısı (`/auth` endpoint'leri) ve API başka bir yerde (ör. mevcut backend hostunuzda) çalışmalıdır. `app.config.json` içindeki `identity.baseUrl` ve `api.baseUrl` değerlerinin canlı ortama uygun olduğundan emin olun.
+
+Bu yaklaşım sayesinde Git geçmişi, kod inceleme süreçleri ve çok dilli/multi-tenant mimari korunur; Easyname sadece statik yayın katmanı olur.
+
 For Release Management UX changes and usage tips see:
 - `docs/ReleaseManagement-UX.md`
 

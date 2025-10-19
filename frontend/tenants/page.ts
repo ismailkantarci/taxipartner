@@ -3,9 +3,11 @@ import { t } from "../i18n/index";
 import { showError, requireFields } from "../ui/error";
 
 type TenantItem = {
-  id: string;
-  code: string;
-  name: string;
+  tenantId: string;
+  legalName: string;
+  legalForm?: string | null;
+  seatAddress?: string | null;
+  status?: string | null;
 };
 
 export async function mountTenantsPage(root: HTMLElement) {
@@ -32,8 +34,10 @@ export async function mountTenantsPage(root: HTMLElement) {
       <section style="margin-bottom:24px">
         <div style="font-weight:600;margin-bottom:8px">${esc(t('createTenant'))}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <input id="tenant-code" style="flex:1;min-width:160px;padding:6px;border:1px solid #e5e7eb;border-radius:8px" placeholder="${esc(t('tenantCodePlaceholder'))}" />
-          <input id="tenant-name" style="flex:1;min-width:200px;padding:6px;border:1px solid #e5e7eb;border-radius:8px" placeholder="${esc(t('tenantNamePlaceholder'))}" />
+          <input id="tenant-id" style="flex:1;min-width:160px;padding:6px;border:1px solid #e5e7eb;border-radius:8px" placeholder="${esc(t('tenantIdPlaceholder'))}" />
+          <input id="tenant-legal-name" style="flex:1;min-width:200px;padding:6px;border:1px solid #e5e7eb;border-radius:8px" placeholder="${esc(t('tenantLegalNamePlaceholder'))}" />
+          <input id="tenant-legal-form" style="flex:1;min-width:160px;padding:6px;border:1px solid #e5e7eb;border-radius:8px" placeholder="${esc(t('tenantLegalFormPlaceholder'))}" />
+          <input id="tenant-seat-address" style="flex:1;min-width:200px;padding:6px;border:1px solid #e5e7eb;border-radius:8px" placeholder="${esc(t('tenantSeatAddressPlaceholder'))}" />
           <button id="tenant-create" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#0ea5e9;color:#fff">${esc(t('createTenant'))}</button>
         </div>
         <div id="tenant-feedback" style="font-size:13px;color:#059669"></div>
@@ -55,8 +59,10 @@ export async function mountTenantsPage(root: HTMLElement) {
     </div>
   `;
 
-  const codeInput = byId<HTMLInputElement>(root, 'tenant-code');
-  const nameInput = byId<HTMLInputElement>(root, 'tenant-name');
+  const tenantIdInput = byId<HTMLInputElement>(root, 'tenant-id');
+  const legalNameInput = byId<HTMLInputElement>(root, 'tenant-legal-name');
+  const legalFormInput = byId<HTMLInputElement>(root, 'tenant-legal-form');
+  const seatAddressInput = byId<HTMLInputElement>(root, 'tenant-seat-address');
   const createBtn = byId<HTMLButtonElement>(root, 'tenant-create');
   const tenantFeedback = byId<HTMLDivElement>(root, 'tenant-feedback');
   const listEl = byId<HTMLDivElement>(root, 'tenant-list');
@@ -67,24 +73,33 @@ export async function mountTenantsPage(root: HTMLElement) {
   const assignFeedback = byId<HTMLDivElement>(root, 'assign-feedback');
 
   createBtn.addEventListener('click', async () => {
-    const code = codeInput.value.trim();
-    const name = nameInput.value.trim();
+    const tenantId = tenantIdInput.value.trim();
+    const legalName = legalNameInput.value.trim();
+    const legalForm = legalFormInput.value.trim();
+    const seatAddress = seatAddressInput.value.trim();
     if (!requireFields([
-      { value: code, message: t('tenantCodeRequired') },
-      { value: name, message: t('tenantNameRequired') }
+      { value: tenantId, message: t('tenantIdRequired') },
+      { value: legalName, message: t('legalNameRequired') }
     ])) {
       return;
     }
     createBtn.disabled = true;
     tenantFeedback.textContent = '';
     try {
-      const response = await createTenant({ code, name });
+      const response = await createTenant({
+        tenantId,
+        legalName,
+        legalForm: legalForm || undefined,
+        seatAddress: seatAddress || undefined
+      });
       if (!response.ok) {
         showError(response.error || t('errorGeneric'));
         return;
       }
-      codeInput.value = '';
-      nameInput.value = '';
+      tenantIdInput.value = '';
+      legalNameInput.value = '';
+      legalFormInput.value = '';
+      seatAddressInput.value = '';
       tenantFeedback.textContent = t('tenantCreated');
       await load();
     } catch (error) {
@@ -138,8 +153,11 @@ export async function mountTenantsPage(root: HTMLElement) {
       listEl.innerHTML = items
         .map((item) => `
           <div style="padding:8px 0;border-bottom:1px solid #f1f5f9">
-            <div style="font-weight:600">${esc(item.name)}</div>
-            <div style="font-size:13px;color:#475569">${esc(t('tenantCodeLabel'))}: ${esc(item.code)}</div>
+            <div style="font-weight:600">${esc(item.legalName)}</div>
+            <div style="font-size:13px;color:#475569">${esc(t('tenantIdLabel'))}: ${esc(item.tenantId)}</div>
+            ${item.legalForm ? `<div style="font-size:13px;color:#64748b">${esc(t('tenantLegalFormLabel'))}: ${esc(item.legalForm)}</div>` : ''}
+            ${item.seatAddress ? `<div style="font-size:13px;color:#94a3b8">${esc(item.seatAddress)}</div>` : ''}
+            ${item.status ? `<div style="font-size:12px;color:#0f172a;text-transform:uppercase">${esc(item.status)}</div>` : ''}
           </div>
         `)
         .join('');

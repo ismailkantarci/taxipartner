@@ -1,6 +1,6 @@
 {
-  "name": "OUs",
-  "title": "Organization Units",
+  "name": "Vehicles",
+  "title": "Araçlar",
   "entry": "index.module.js",
   "version": "1.3.1100"
 }

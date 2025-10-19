@@ -9,13 +9,19 @@ tenantsRouter.get(
   "/",
   permissionGuard(["tp.tenant.read"]),
   async (req, res) => {
-    const q = String(req.query.q || "");
+    const qRaw = req.query?.q;
+    const q =
+      typeof qRaw === "string"
+        ? qRaw
+        : Array.isArray(qRaw)
+        ? (qRaw[0] as string) ?? ""
+        : "";
     const rows = await prisma.tenant.findMany({
       where: q
         ? {
             OR: [
-              { code: { contains: q, mode: "insensitive" } },
-              { name: { contains: q, mode: "insensitive" } }
+              { tenantId: { contains: q } },
+              { legalName: { contains: q } }
             ]
           }
         : undefined,
@@ -29,13 +35,19 @@ tenantsRouter.post(
   "/",
   permissionGuard(["tp.tenant.create"]),
   async (req, res) => {
-    const { code, name, locale, timeZone } = req.body || {};
-    if (!code || !name) {
-      res.status(400).json({ ok: false, error: "code ve name zorunlu" });
+    const { tenantId, legalName, legalForm, seatAddress, status } = req.body || {};
+    if (!tenantId || !legalName) {
+      res.status(400).json({ ok: false, error: "tenantId ve legalName zorunlu" });
       return;
     }
     const tenant = await prisma.tenant.create({
-      data: { code, name, locale, timeZone }
+      data: {
+        tenantId,
+        legalName,
+        legalForm: legalForm || null,
+        seatAddress: seatAddress || null,
+        status: status || "Active"
+      }
     });
     res.status(201).json({ ok: true, tenant });
   }

@@ -11,6 +11,10 @@ model User {
   id         String   @id @default(cuid())
   email      String   @unique
   password   String
+  fullName   String?
+  phone      String?
+  preferredLanguage String? @default("de-AT")
+  preferredTheme    String? @default("system")
   mfaEnabled Boolean  @default(false)
   mfaSecret  String?
   createdAt  DateTime @default(now())
@@ -134,49 +138,129 @@ model Notification {
 }
 
 model Tenant {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  name      String
-  locale    String?
-  timeZone  String?
-  createdAt DateTime @default(now())
-  users     TenantUser[]
-  ous       OU[]
-  companies Company[]
+  tenantId    String   @id @map("tenant_id")
+  legalName   String   @map("legal_name")
+  legalForm   String?  @map("legal_form")
+  seatAddress String?  @map("seat_address")
+  status      String   @default("Active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  users       TenantUser[]
+  ous         OU[]
+  companies   Company[]
+  vehicles    Vehicle[]
+
+  @@map("tenants")
 }
 
 model TenantUser {
-  tenantId String
-  userId   String
+  tenantId String @map("tenant_id")
+  userId   String @map("user_id")
   role     String?
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenant   Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   user     User   @relation("UserTenantMemberships", fields: [userId], references: [id])
+
   @@id([tenantId, userId])
+  @@map("tenant_users")
 }
 
 model OU {
-  id        String   @id @default(cuid())
-  tenantId  String
+  id        String  @id @default(uuid()) @map("ou_id")
+  tenantId  String  @map("tenant_id")
   name      String
-  parentId  String?
-  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  parentId  String? @map("parent_id")
+  tenant    Tenant  @relation(fields: [tenantId], references: [tenantId])
+  parent    OU?     @relation("OUParent", fields: [parentId], references: [id])
+  children  OU[]    @relation("OUParent")
+
   @@index([tenantId])
+  @@unique([tenantId, name])
+  @@map("ous")
 }
 
 model Company {
-  id          String   @id @default(cuid())
-  tenantId    String
-  legalName   String
-  legalForm   String
-  uid         String?
-  regNo       String?
-  status      String   @default("Active")
-  createdAt   DateTime @default(now())
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  companyId   String        @id @map("company_id")
+  tenantId    String        @map("tenant_id")
+  legalName   String        @map("legal_name")
+  address     String
+  status      String        @default("Active")
+  tenant      Tenant        @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   officers    CompanyOfficer[]
   shareholders Shareholder[]
   documents   CompanyDocument[]
+  vehicles    Vehicle[]
+  permits     CompanyPermit[]
+  permitEvents CompanyPermitEvent[]
+
   @@index([tenantId])
+  @@unique([tenantId, companyId])
+  @@map("companies")
+}
+
+model CompanyPermit {
+  id                String   @id @default(uuid())
+  companyId         String   @map("company_id")
+  permitType        String   @map("permit_type")
+  issuingAuthority  String?  @map("issuing_authority")
+  referenceNo       String?  @map("reference_no")
+  permitRegisteredOn DateTime? @map("permit_registered_on")
+  effectiveFrom     DateTime? @map("effective_from")
+  validUntil        DateTime? @map("valid_until")
+  capacityPkw       Int?     @map("capacity_pkw")
+  vehicleScoped     Boolean  @default(false) @map("vehicle_scoped")
+  status            String   @map("status")
+  company           Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  events            CompanyPermitEvent[]
+  vehicleAuthorizations VehicleAuthorization[]
+
+  @@index([companyId])
+  @@map("company_permits")
+}
+
+model CompanyPermitEvent {
+  id           String   @id @default(uuid())
+  companyId    String   @map("company_id")
+  referenceNo  String?  @map("reference_no")
+  eventType    String   @map("event_type")
+  eventDate    DateTime @map("event_date")
+  sourceDocRef String?  @map("source_doc_ref")
+  permitId     String?  @map("permit_id")
+  company      Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  permit       CompanyPermit? @relation(fields: [permitId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([permitId])
+  @@map("company_permit_events")
+}
+
+model VehicleAuthorization {
+  id           String   @id @default(uuid())
+  permitId     String   @map("permit_id")
+  vehicleId    String?  @map("vehicle_id")
+  vin          String
+  authorizedOn DateTime @map("authorized_on")
+  revokedOn    DateTime? @map("revoked_on")
+  permit       CompanyPermit @relation(fields: [permitId], references: [id], onDelete: Cascade)
+  vehicle      Vehicle? @relation(fields: [vehicleId], references: [vehicleId], onDelete: SetNull)
+
+  @@index([vehicleId])
+  @@unique([permitId, vin])
+  @@map("vehicle_authorizations")
+}
+
+model Vehicle {
+  vehicleId String        @id @default(uuid()) @map("vehicle_id")
+  tenantId  String        @map("tenant_id")
+  companyId String        @map("company_id")
+  vin       String        @unique
+  plateNo   String?       @map("plate_no")
+  seatCount Int?          @map("seat_count")
+  usage     String?
+  status    String        @default("Active")
+  tenant    Tenant        @relation(fields: [tenantId], references: [tenantId])
+  company   Company       @relation(fields: [companyId], references: [companyId])
+  authorizations VehicleAuthorization[]
+
+  @@map("vehicles")
 }
 
 model CompanyOfficer {
@@ -186,7 +270,7 @@ model CompanyOfficer {
   type      String
   validFrom DateTime?
   validTo   DateTime?
-  company   Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [companyId])
   user      User?   @relation("UserCompanyOfficers", fields: [userId], references: [id])
   @@index([companyId])
 }
@@ -197,7 +281,7 @@ model Shareholder {
   personName String
   roleType   String
   percent    Float?
-  company    Company @relation(fields: [companyId], references: [id])
+  company    Company @relation(fields: [companyId], references: [companyId])
   @@index([companyId])
 }
 
@@ -209,6 +293,6 @@ model CompanyDocument {
   url       String?
   metaJson  String?
   createdAt DateTime @default(now())
-  company   Company  @relation(fields: [companyId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [companyId])
   @@index([companyId])
 }
