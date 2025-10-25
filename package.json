@@ -62,7 +62,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.4.1",
     "@commitlint/config-conventional": "^19.4.1",
-    "@cyclonedx/cyclonedx-npm": "^4.0.2",
+    "@cyclonedx/cyclonedx-npm": "^4.0.3",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.11.1",
     "husky": "^9.0.11",
