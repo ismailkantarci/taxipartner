@@ -695,6 +695,10 @@ ensure_frontend_spa() {
 ensure_taxipartner_admin() {
   local log_file="${PROJECT_DIR}/.tp.taxipartner-admin.log"
   local url="http://127.0.0.1:${ADMIN_SUITE_PORT}"
+  if [[ ! -d "${PROJECT_DIR}/taxipartner-admin" ]]; then
+    warn "taxipartner-admin klasörü bulunamadı; dev sunucusu atlandı."
+    return 0
+  fi
   if port_in_use "$ADMIN_SUITE_PORT"; then
     if probe_http "$url"; then
       ok "Taxipartner Admin (:$ADMIN_SUITE_PORT) ayakta"
