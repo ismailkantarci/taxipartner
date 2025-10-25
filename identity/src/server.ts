@@ -30,9 +30,11 @@ import { companiesRouter } from './companies.routes.js';
 import { healthRouter } from './health.routes.js';
 import { langHint } from './lang.middleware.js';
 import { errorMiddleware } from './error.middleware.js';
+import { jwtMiddleware } from './middleware/jwt';
 
 const app = express();
 app.use(express.json());
+app.use(jwtMiddleware);
 applySecurity(app);
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
