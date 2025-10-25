@@ -89,3 +89,26 @@ Her terminalde `Ctrl + C` basarak süreçleri durdurabilirsin.
 - **Port çakışması**: Süreçleri `Ctrl + C` ile durdurup tekrar başlat.
 
 Bu dosyayı düzenleyerek ilerideki değişiklikleri de buraya not edebilirsin.
+- **JWT doğrulaması (`jose`)**
+  - Varsayılan olarak `JWT_ALLOW_UNVERIFIED=true` yalnızca geliştirme için açık gelir. Üretim / staging ortamlarında bu değeri kaldırın veya `false` yapın.
+  - İmza doğrulaması için aşağıdaki değişkenlerin tanımlı olması gerekir:
+    - `JWT_ISSUER`
+    - `JWT_AUDIENCE`
+    - İmzalama türüne göre:
+      - HMAC (`HS*`): `JWT_SECRET`
+      - RSA/ECDSA (`RS*` / `ES*`): `JWT_JWKS_URL` (opsiyonel olarak `JWT_PUBLIC_KEY`)
+  - Middleware, doğrulanan claim’leri `req.user`, normalize principal’ı `req.principal` ve ham bilgileri `req.jwt` alanlarına yazar.
+
+- **RLS otomasyon**
+  - `npm run db:rls:auto` komutu `scripts/db/rls-auto-apply.sh` aracılığıyla `db:rls:ensure --apply` çağrısını yapar.
+  - `tp up` sırasında aynı işlemi tetiklemek için `RLS_AUTO_APPLY=true ./tp up` veya `RLS_AUTO_APPLY=true tp up` kullanın.
+  - Varsayılan kapalıdır; çünkü çoğu senaryoda RLS değişikliği yapılmadığı sürece gerekmez.
+
+- **tp komutları**
+  - `tp up` → Dev servislerini ayağa kaldırır, gerekirse süreçleri öldürüp yeniden başlatır, log analizi yapar.
+  - `tp gh:sync` → Çalışma ağacı temizse `git add/commit/push` akışını otomatik yürütür. Takip edilen remote branch yoksa uyarı verir.
+  - `tp status` → Son 50 olay üzerinden analiz, servis health kontrolleri ve gerektiğinde auto restart/force clean uygular.
+  - `tp stop` → Dev süreçlerini sonlandırır; `tp stop db` veya `TP_DB_DOWN=1` ile Postgres’i de kapatır.
+- **Notlar**
+  - Admin UI dizini (`taxipartner-admin/`) repo içinde yoksa `tp up` yalnızca uyarı basar ve o servisi atlar.
+  - `npm run db:rls:auto` veya `tp up` sırasında RLS otomatik uygulanıyorsa loglarda `[rls-auto]` prefiksi ile görülebilir.
